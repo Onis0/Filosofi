@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Filosofi 1 — Interaktiv Studieplattform</title>
+<style>
+  :root {
+    --bg-main: #FAFAFA; --bg-surface: #FFFFFF;
+    --text-primary: #111827; --text-secondary: #4B5563;
+    --accent-primary: #1F4E79; --accent-focus: #C9A227;
+    --border-subtle: #E5E7EB;
+    --semantic-claim: #2E5C4A; --semantic-counter: #7A3B2E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg-main); color: var(--text-primary);
+    font-family: 'Source Serif Pro', Georgia, 'Times New Roman', serif; font-size: 18px;
+    line-height: 1.65; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  h1, h2, h3, h4, nav, button, label, input, select, textarea, .badge, .meta {
+    font-family: 'Inter', 'System UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  h1 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  h2 { font-size: 1.5rem; font-weight: 600; margin: 2rem 0 1rem; line-height: 1.3; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
+  h4 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text-secondary); }
+  p { margin-bottom: 1rem; max-width: 680px; }
+  a { color: var(--accent-primary); text-decoration: none; word-break: break-word; }
+  a:hover { text-decoration: underline; }
+
+  header.site-header { background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);
+    padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 0.75rem; }
+  .logo { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+  .logo span { color: var(--accent-primary); }
+  nav.main-nav { display: flex; gap: 0.2rem; flex-wrap: wrap; }
+  nav.main-nav button { background: transparent; border: none; padding: 0.5rem 0.85rem;
+    font-size: 0.88rem; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+    border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
+  nav.main-nav button:hover { background: #F3F4F6; color: var(--text-primary); }
+  nav.main-nav button.active { background: var(--accent-primary); color: white; }
+  nav.main-nav button:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .view { display: none; animation: fade 0.25s ease-out; }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .reading-col { max-width: 680px; }
+  .reading-col p { max-width: 100%; }
+
+  .card { background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card p:last-child { margin-bottom: 0; }
+
+  .search-input { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-family: inherit;
+    border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-surface);
+    margin-bottom: 1.25rem; -webkit-appearance: none; }
+  .search-input:focus { outline: 2px solid var(--accent-focus); outline-offset: 1px; }
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
+  .concept-item { background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.15s;
+    text-align: left; font-family: inherit; font-size: 1rem; color: inherit; min-height: 76px; }
+  .concept-item:hover { border-color: var(--accent-primary); transform: translateY(-1px); }
+  .concept-item:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 1px; }
+  .concept-item .term { font-weight: 600; font-size: 1rem; display: block; margin-bottom: 0.25rem; }
+  .concept-item .category { font-size: 0.72rem; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.6);
+    z-index: 1000; padding: 0.75rem; overflow-y: auto;
+    align-items: flex-start; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg-surface); border-radius: 12px; max-width: 720px; width: 100%;
+    padding: 1.5rem; margin: 1rem auto; position: relative; }
+  .modal-close { position: absolute; top: 0.5rem; right: 0.5rem; background: transparent;
+    border: none; font-size: 1.6rem; cursor: pointer; color: var(--text-secondary);
+    width: 40px; height: 40px; border-radius: 8px; line-height: 1; }
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-close:focus-visible { outline: 2px solid var(--accent-focus); }
+
+  .level-box { margin-top: 0.85rem; padding: 0.9rem 1rem; border-radius: 8px;
+    font-size: 0.95rem; line-height: 1.65; }
+  .lvl-1 { background: #EFF6FF; border-left: 3px solid #3B82F6; }
+  .lvl-2 { background: #F0FDF4; border-left: 3px solid #16A34A; }
+  .lvl-3 { background: #FEFCE8; border-left: 3px solid #CA8A04; }
+  .lvl-4 { background: #FEF2F2; border-left: 3px solid #DC2626; }
+  .level-box b { font-family: 'Inter',sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.03em; text-transform: uppercase; display: block; margin-bottom: 0.35rem; }
+
+  .select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+    display: block; margin-bottom: 0.35rem; }
+  select { width: 100%; padding: 0.65rem 0.75rem; font-size: 0.95rem; font-family: inherit;
+    border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-surface);
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292%22%20height%3D%22292%22%3E%3Cpath%20fill%3D%22%234B5563%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat; background-position: right 0.7rem top 50%; background-size: 0.65rem auto;
+    padding-right: 2rem; }
+
+  .cmp-section { background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: 10px; padding: 1.25rem 1.4rem; margin-bottom: 1rem; }
+  .cmp-section h4 { margin: 0 0 0.85rem; display: flex; align-items: center; gap: 0.6rem;
+    color: var(--text-primary); font-size: 1rem; flex-wrap: wrap; }
+  .level-badge { display: inline-block; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.06em; padding: 0.25rem 0.6rem; border-radius: 4px; text-transform: uppercase; }
+  .level-badge.e { background: #F3F4F6; color: #6B7280; border: 1px solid #D1D5DB; }
+  .level-badge.c { background: #FEFCE8; color: #A16207; border: 1px solid #FDE68A; }
+  .level-badge.a { background: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5; }
+  .cmp-section p { max-width: 100%; font-size: 0.97rem; }
+
+  .case-box { background: #FFFBEB; border-left: 3px solid var(--accent-focus);
+    padding: 1rem 1.2rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.95rem; }
+  .choice-btn { display: block; width: 100%; text-align: left; background: var(--bg-surface);
+    border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1rem 1.1rem;
+    font-size: 0.95rem; font-family: inherit; cursor: pointer; margin-bottom: 0.5rem;
+    transition: all 0.15s; color: inherit; min-height: 52px; }
+  .choice-btn:hover { border-color: var(--accent-primary); background: #F8FAFC; }
+  .choice-btn.selected { border-color: var(--accent-primary); background: #EFF6FF; }
+  .feedback-box { display: none; background: var(--bg-surface);
+    border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.2rem; margin-top: 1rem; }
+  .feedback-box.show { display: block; animation: fade 0.2s; }
+  .feedback-box h4 { color: var(--accent-primary); }
+  .feedback-item { padding: 0.75rem 0; border-top: 1px solid var(--border-subtle); font-size: 0.92rem; }
+  .feedback-item:first-of-type { border-top: none; padding-top: 0.25rem; }
+
+  .flash-wrap { max-width: 560px; margin: 0 auto; text-align: center; }
+  .mode-toggle { display: inline-flex; background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: 8px; padding: 3px; margin-bottom: 1.25rem; }
+  .mode-toggle button { background: transparent; border: none; padding: 0.55rem 1rem;
+    font-size: 0.9rem; font-weight: 600; font-family: inherit; cursor: pointer;
+    color: var(--text-secondary); border-radius: 6px; min-height: 40px; }
+  .mode-toggle button.active { background: var(--accent-primary); color: white; }
+  .mode-toggle button:focus-visible { outline: 2px solid var(--accent-focus); }
+
+  .flashcard { perspective: 1200px; height: 340px; cursor: pointer; margin-bottom: 1.25rem; }
+  .flashcard-inner { position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flash-face { position: absolute; inset: 0; backface-visibility: hidden;
+    -webkit-backface-visibility: hidden; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 1.5rem; border-radius: 12px;
+    background: var(--bg-surface); border: 1px solid var(--border-subtle); overflow-y: auto; }
+  .flash-face.back { transform: rotateY(180deg); background: #F0F9FF; border-color: var(--accent-primary); }
+  .flash-tag { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent-primary); font-weight: 600; margin-bottom: 0.75rem; }
+  .flash-q { font-size: 1.1rem; font-weight: 600; line-height: 1.4; }
+  .flash-a { font-size: 0.98rem; line-height: 1.6; }
+
+  .btn-row { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+  button.btn { font-family: 'Inter',sans-serif; font-size: 0.9rem; font-weight: 500;
+    padding: 0.65rem 1.1rem; border-radius: 8px; border: 1px solid var(--border-subtle);
+    background: var(--bg-surface); color: var(--text-primary); cursor: pointer;
+    transition: all 0.15s; min-height: 44px; }
+  button.btn:hover { background: #F3F4F6; }
+  button.btn-primary { background: var(--accent-primary);
+    border-color: var(--accent-primary); color: white; }
+  button.btn-primary:hover { background: #163A5C; }
+  button.btn:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
+  button.btn-large { padding: 0.9rem 1.5rem; font-size: 1rem; }
+
+  .accordion { margin-bottom: 0.75rem; border: 1px solid var(--border-subtle);
+    border-radius: 8px; overflow: hidden; background: var(--bg-surface); }
+  .accordion-header { width: 100%; background: transparent; border: none;
+    padding: 1rem 1.2rem; font-size: 0.95rem; font-weight: 600; font-family: inherit;
+    text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 0.5rem; color: var(--text-primary); }
+  .accordion-header:hover { background: #F9FAFB; }
+  .accordion-header .badge { display: inline-block; font-size: 0.68rem; font-weight: 600;
+    padding: 0.18rem 0.5rem; border-radius: 4px; background: #EFF6FF;
+    color: var(--accent-primary); margin-right: 0.5rem; letter-spacing: 0.04em;
+    text-transform: uppercase; }
+  .accordion-header .badge.c-level { background: #FEFCE8; color: #A16207; }
+  .accordion-header .badge.a-level { background: #FEF2F2; color: #B91C1C; }
+  .accordion-header > span:first-child { flex: 1; }
+  .accordion-content { display: none; padding: 0 1.2rem 1.2rem;
+    font-size: 0.95rem; border-top: 1px solid var(--border-subtle); }
+  .accordion-content.show { display: block; }
+  .accordion-content h4 { margin-top: 1rem; }
+  .example-answer { background: #F8FAFC; padding: 1rem; border-radius: 8px;
+    border-left: 3px solid var(--accent-primary); margin-top: 0.75rem;
+    font-size: 0.92rem; line-height: 1.65; }
+  .self-check { list-style: none; margin-top: 0.75rem; }
+  .self-check li { padding: 0.4rem 0; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .self-check li::before { content: "☐"; font-size: 1.1rem; color: var(--text-secondary); flex-shrink: 0; }
+
+  .tlink { color: var(--accent-primary); border-bottom: 1px dotted var(--accent-primary);
+    cursor: pointer; transition: background 0.15s; }
+  .tlink:hover { background: #EFF6FF; }
+
+  .placeholder { color: var(--text-secondary); font-style: italic;
+    padding: 2rem 0; text-align: center; }
+
+  .random-task { background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .random-task .assigned-theory { display: inline-block; background: var(--accent-primary);
+    color: white; padding: 0.35rem 0.85rem; border-radius: 6px; font-size: 0.85rem;
+    font-weight: 600; letter-spacing: 0.03em; margin-bottom: 1rem; }
+  .random-task .scenario { font-size: 1.05rem; line-height: 1.55; font-weight: 500;
+    margin-bottom: 0.75rem; max-width: 100%; }
+  .random-task .question { font-size: 0.98rem; color: var(--text-secondary);
+    margin-bottom: 1rem; font-style: italic; max-width: 100%; }
+  textarea.prov-answer { width: 100%; min-height: 160px; padding: 1rem;
+    font-family: inherit; font-size: 0.95rem; line-height: 1.6;
+    border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-surface);
+    resize: vertical; margin-bottom: 0.75rem; color: inherit; }
+  textarea.prov-answer:focus { outline: 2px solid var(--accent-focus); outline-offset: 1px; }
+  .facit-box { display: none; background: #F8FAFC; border-left: 3px solid var(--accent-primary);
+    padding: 1.2rem 1.4rem; border-radius: 0 8px 8px 0; margin-top: 1rem; }
+  .facit-box.show { display: block; animation: fade 0.25s; }
+  .facit-box h4 { margin-top: 1rem; }
+  .facit-box h4:first-child { margin-top: 0; }
+  .facit-box .facit-level { padding: 0.75rem 0; border-top: 1px solid var(--border-subtle); font-size: 0.93rem; }
+  .facit-box .facit-level:first-of-type { border-top: none; padding-top: 0.25rem; }
+  .facit-box .facit-level b { font-family: 'Inter',sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-primary);
+    display: block; margin-bottom: 0.3rem; }
+
+  @media (max-width: 760px) {
+    body { font-size: 16.5px; }
+    h1 { font-size: 1.65rem; }
+    h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; }
+    header.site-header { padding: 0.75rem 1rem; gap: 0.5rem; }
+    .logo { font-size: 0.9rem; flex: 1 1 100%; }
+    nav.main-nav { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px; flex-wrap: nowrap; }
+    nav.main-nav button { flex-shrink: 0; font-size: 0.82rem; padding: 0.5rem 0.75rem; }
+    main { padding: 1.25rem 1rem 3rem; }
+    .card { padding: 1.15rem; border-radius: 8px; }
+    .select-row { grid-template-columns: 1fr; }
+    .concept-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+    .concept-item { padding: 0.85rem 1rem; min-height: auto; }
+    .modal { padding: 1.2rem; margin: 0.5rem auto; }
+    .modal-overlay { padding: 0.5rem; }
+    .flashcard { height: 400px; }
+    .flash-face { padding: 1.2rem; }
+    .flash-q { font-size: 1rem; }
+    .flash-a { font-size: 0.92rem; }
+    .btn-row { gap: 0.4rem; }
+    button.btn { font-size: 0.85rem; padding: 0.6rem 0.9rem; }
+    .random-task { padding: 1.1rem; }
+    .level-box { font-size: 0.92rem; padding: 0.8rem 0.9rem; }
+    .accordion-header { padding: 0.85rem 1rem; font-size: 0.9rem; }
+    .accordion-content { padding: 0 1rem 1rem; }
+    .cmp-section { padding: 1.1rem; }
+    .cmp-section h4 { font-size: 0.95rem; }
+    .cmp-section p { font-size: 0.93rem; }
+    .example-answer { font-size: 0.88rem; padding: 0.85rem; }
+    .facit-box { padding: 1rem 1.1rem; }
+  }
+  @media (max-width: 380px) {
+    body { font-size: 16px; }
+    h1 { font-size: 1.5rem; }
+    .flashcard { height: 440px; }
+    nav.main-nav button { font-size: 0.78rem; padding: 0.45rem 0.6rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    html { scroll-behavior: auto; }
+  }
+  :focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">Filosofi 1 <span>· Interaktiv Studieplattform</span></div>
+  <nav class="main-nav" role="tablist" aria-label="Huvudnavigering">
+    <button class="active" data-view="guide" role="tab" aria-selected="true">Guide</button>
+    <button data-view="compare" role="tab" aria-selected="false">Jämförelser</button>
+    <button data-view="begrepp" role="tab" aria-selected="false">Begrepp (34)</button>
+    <button data-view="lab" role="tab" aria-selected="false">Etik-lab</button>
+    <button data-view="cards" role="tab" aria-selected="false">Flashcards</button>
+    <button data-view="prov" role="tab" aria-selected="false">Provträning</button>
+  </nav>
+</header>
+
+<main>
+
+<section id="view-guide" class="view active" role="tabpanel">
+  <div class="reading-col">
+    <h1>Studieguide</h1>
+    <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Genomgång av Filosofi 1:s tre huvudblock. Klicka på rödmarkerade begrepp för att öppna dem i fyra nivåer.</p>
+  </div>
+
+  <article class="card reading-col">
+    <h2>Modul 1 — Värdeteori och normativ etik</h2>
+    <p><span class="tlink" data-term="vardefilosofi">Värdefilosofi</span> undersöker vad som är värdefullt och varför. Central distinktion: <span class="tlink" data-term="finalt">finalt värde</span> kontra <span class="tlink" data-term="instrumentellt">instrumentellt värde</span>. <span class="tlink" data-term="objektivism">Objektivism</span> menar att vissa värden finns oberoende av människan.</p>
+    <p>Normativa teorier: <span class="tlink" data-term="utilitarism">utilitarism</span>, <span class="tlink" data-term="pliktetik">pliktetik</span>, <span class="tlink" data-term="regeletik">regeletik</span>, <span class="tlink" data-term="sinnelagsetik">sinnelagsetik</span>, <span class="tlink" data-term="dygdetik">dygdetik</span>, <span class="tlink" data-term="etisk_egoism">etisk egoism</span>, <span class="tlink" data-term="altruism">altruism</span>. <span class="tlink" data-term="regelutilitarism">Regelutilitarism</span> följer generella regler. <span class="tlink" data-term="gyllene">Gyllene regeln</span> är en klassisk regeletisk princip.</p>
+  </article>
+
+  <article class="card reading-col">
+    <h2>Modul 2 — Filosofiska livsstrategier</h2>
+    <p><span class="tlink" data-term="hedonism">Hedonism</span> söker lust, <span class="tlink" data-term="stoicism">stoicism</span> söker sinnesro, <span class="tlink" data-term="nihilism">nihilism</span> förnekar mening, <span class="tlink" data-term="existentialism">existentialism</span> skapar mening genom val. <span class="tlink" data-term="eudaimonism">Eudaimonism</span> ser mänskligt blomstrande som högsta mål. <span class="tlink" data-term="situationsetik">Situationsetik</span> och <span class="tlink" data-term="existentiell">existentiell ångest</span> är centrala existentialistiska begrepp.</p>
+  </article>
+
+  <article class="card reading-col">
+    <h2>Modul 3 — Samhällsfilosofi</h2>
+    <p>Samhälle, <span class="tlink" data-term="stat">stat</span>, <span class="tlink" data-term="nation">nation</span> och <span class="tlink" data-term="medborgare">medborgare</span>. <span class="tlink" data-term="kosmopolitism">Kosmopolitism</span> och <span class="tlink" data-term="varldsmedborgare">världsmedborgare</span>. Fördelningsrättvisa: <span class="tlink" data-term="jamlikhet">jämlikhet</span> vs <span class="tlink" data-term="meriter">meriter</span>. Rättigheter: <span class="tlink" data-term="positiva">positiva</span> vs <span class="tlink" data-term="negativa">negativa</span>. <span class="tlink" data-term="okunnighetens">Okunnighetens slöja</span>, <span class="tlink" data-term="naturratt">naturrätt</span>, <span class="tlink" data-term="moraliskt_subjekt">moraliskt subjekt</span>/<span class="tlink" data-term="moraliskt_objekt">objekt</span>.</p>
+  </article>
+</section>
+
+<section id="view-compare" class="view" role="tabpanel">
+  <h1>Jämförelser</h1>
+  <p style="color:var(--text-secondary); margin-bottom:1.25rem; max-width:680px;">Välj två teorier. Fullständig E/C/A-analys finns för samtliga par inom samma grupp. <strong>Grupp 1 (normativ etik):</strong> regeletik, pliktetik, dygdetik, sinnelagsetik, konsekvensetik, etisk egoism, altruism, utilitarism. <strong>Grupp 2 (livsstrategier):</strong> hedonism, stoicism, existentialism, nihilism.</p>
+
+  <div class="select-row" style="max-width:680px;">
+    <div><label for="selA">Teori A</label><select id="selA"></select></div>
+    <div><label for="selB">Teori B</label><select id="selB"></select></div>
+  </div>
+
+  <div class="btn-row" style="justify-content:flex-start; margin-bottom:1rem;">
+    <button class="btn" id="swapBtn" type="button">⇄ Byt plats</button>
+    <button class="btn" id="suggestBtn" type="button">🎯 Slumpa jämförelse</button>
+  </div>
+
+  <div id="cmpOutput"></div>
+</section>
+
+<section id="view-begrepp" class="view" role="tabpanel">
+  <h1>Begreppsbank — 34 begrepp</h1>
+  <p style="color:var(--text-secondary); margin-bottom:1.25rem; max-width:680px;">Samtliga provbegrepp med förklaring i fyra nivåer.</p>
+  <input type="text" id="searchBeg" class="search-input" placeholder="Sök begrepp…" aria-label="Sök begrepp" autocomplete="off">
+  <div id="begGrid" class="concept-grid"></div>
+</section>
+
+<section id="view-lab" class="view" role="tabpanel">
+  <h1>Etik-laboratorium</h1>
+  <p style="color:var(--text-secondary); margin-bottom:1.25rem; max-width:680px;">Konkreta fall. Välj en handling — se hur flera teorier bedömer den.</p>
+  <div class="card" style="max-width:820px;">
+    <label for="caseSelect">Välj fall</label>
+    <select id="caseSelect" style="margin-bottom:1rem;"></select>
+    <div id="caseBox" class="case-box"></div>
+    <h4>Hur handlar du?</h4>
+    <div id="choiceList"></div>
+    <div id="caseFeedback" class="feedback-box"></div>
+  </div>
+</section>
+
+<section id="view-cards" class="view" role="tabpanel">
+  <h1>Flashcards</h1>
+  <p style="color:var(--text-secondary); margin-bottom:1rem; max-width:680px;">Klicka på kortet för att vända det. Välj läge nedan.</p>
+  <div class="flash-wrap">
+    <div class="mode-toggle" role="tablist" aria-label="Flashcard-läge">
+      <button class="active" data-mode="all" role="tab" aria-selected="true">Alla flashcards</button>
+      <button data-mode="concepts" role="tab" aria-selected="false">Endast begrepp (34)</button>
+    </div>
+    <div class="flashcard" id="flashcard" tabindex="0" role="button" aria-label="Vänd kort">
+      <div class="flashcard-inner">
+        <div class="flash-face front">
+          <div class="flash-tag" id="cardTag">—</div>
+          <div class="flash-q" id="cardQ">—</div>
+        </div>
+        <div class="flash-face back">
+          <div class="flash-a" id="cardA">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="cardPrev">← Föregående</button>
+      <button class="btn" id="cardShuffle">🔀 Slumpa</button>
+      <button class="btn btn-primary" id="cardNext">Nästa →</button>
+    </div>
+    <p style="margin-top:1rem; color:var(--text-secondary); font-size:0.9rem;" id="cardCounter">1 / 1</p>
+  </div>
+</section>
+
+<section id="view-prov" class="view" role="tabpanel">
+  <h1>Provträning — Slumpmässig teori</h1>
+  <p style="color:var(--text-secondary); margin-bottom:1.25rem; max-width:680px;">Tryck för en fråga med <strong>slumpmässigt tilldelad teori</strong>. Skriv ditt svar, visa facit, rätta dig själv. Upprepa hur många gånger du vill.</p>
+
+  <div id="randomTaskContainer">
+    <div class="placeholder">Tryck på knappen för att börja.</div>
+  </div>
+
+  <div class="btn-row" style="justify-content:flex-start; margin-top:1rem;">
+    <button class="btn btn-primary btn-large" id="newTaskBtn" type="button">🎲 Slumpa fram en uppgift</button>
+  </div>
+
+  <div style="margin-top:2.5rem;">
+    <h2 style="margin-top:0;">Fast provträning (E/C/A)</h2>
+    <p style="color:var(--text-secondary);">Klassiska provfrågor med färdiga exempelsvar och checklista.</p>
+    <div id="provList"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Stäng">×</button>
+    <div id="modalTitle"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DE 34 BEGREPPEN
+   ============================================================ */
+const CONCEPTS = {
+  "vardefilosofi": { term: "Värdefilosofi", cat: "Värdeteori",
+    l1: "Läran om vad som är värdefullt och varför.",
+    l2: "Den filosofiska gren som undersöker värdens natur: vad gör något värdefullt? Finns det objektiva värden eller är de konstruerade? Skiljer mellan finala värden (värdefulla i sig) och instrumentella värden (medel).",
+    l3: "Värdefilosofin ligger till grund för etiken. Varje normativ etisk teori vilar på en värdeteori om vad som är finalt gott (utilitarism: lust; dygdetik: eudaimonia; Kant: den goda viljan). Värdeteorin diskuterar också om värden är objektiva eller subjektiva — en metafysisk fråga som skiljer objektivism från nihilism. Om värden är objektiva kan moralfilosofi i princip lösa oenigheter genom upptäckt; om konstruerade, genom beslut.",
+    l4: "På provet: använd värdeteorin för att dissekera motståndarens argument. Om någon säger 'utilitarismen bryr sig bara om njutning' — fråga: menar du att lust är det enda FINALA värdet? Ett A-svar visar att du förstår att varje etisk teori förutsätter en värdeteori om vad som är gott i sig." },
+  "utilitarism": { term: "Utilitarism", cat: "Normativ etik",
+    l1: "Välj det som gör flest människor så lyckliga som möjligt.",
+    l2: "En altruistisk konsekvensetik: en handling är rätt om den maximerar sammanlagd lycka och minimerar lidande. Bentham mätte lust kvantitativt; Mill införde kvalitativa skillnader — bildning är högre än kroppslig njutning.",
+    l3: "Handlingsutilitarism kalkylerar varje enskild handling; regelutilitarism följer generella regler som över tid maximerar lyckan. Mill: 'Det är bättre att vara en missnöjd Sokrates än en belåten dumbom.' Kritik mot Mill: han smuggler in icke-utilitaristiska värden genom att hävda att viss lust är objektivt bättre. Kritik mot Bentham: reducerar all lycka till samma sak.",
+    l4: "På provet: undvik karikatyren 'känslolös kalkyl'. I tortyrdilemmat: handlingsutilitaristen tillåter tortyr; regelutilitaristen fördömer — en regel som tillåter tortyr undergräver rättsstaten. Skillnaden mot Kant: regelutilitaristen fördömer av systemiska skäl, kantianen för att handlingen själv kränker människan." },
+  "dygdetik": { term: "Dygdetik", cat: "Normativ etik",
+    l1: "Frågan är hur en god människa är — inte vad som är rätt handling.",
+    l2: "Fokus på aktörens karaktär. Aristoteles: dygden är medelvägen mellan två ytterligheter. Mod mellan feghet och våghalsighet. Moralen odlas genom praktisk träning under hela livet.",
+    l3: "Styrka: fångar moralisk mognad — en god människa handlar gott av karaktär. Kritik: vaghet och kulturberoende. Aristoteles' svar: phronesis — den dygdige vet hur man handlar i enskilda fall. Einhorn: falsk snällhet (flathet) vs äkta snällhet (omtanke + integritet).",
+    l4: "På provet: nyckelgrepp är 'vad bör etiken primärt utvärdera?' — dygdetik svarar aktören, handlingsetik handlingen. A-nivå: visa att dygdetik kompletterar handlingsetiken. Skilj från eudaimonism: dygdetik är normativ, eudaimonism värdeteoretisk." },
+  "sinnelagsetik": { term: "Sinnelagsetik", cat: "Normativ etik",
+    l1: "Det är avsikten som räknas — inte resultatet.",
+    l2: "Handlingens moraliska värde avgörs av aktörens goda avsikt. Om du menar väl är handlingen rätt, även om konsekvenserna blir dåliga.",
+    l3: "Kritik: efterrationalisering. Verifierbarhetsproblemet — hur vet vi att avsikten var god? Tre svar: (1) ren internalism (avsikten är privat, epistemisk begränsning), (2) externalism (avsikten bedöms utifrån epistemisk omsorg — en revidering), (3) pragmatism (för självrannsakan, inte juridik).",
+    l4: "På provet: sinnelagsetik dyker upp i jämförelser med utilitarismen. Att skänka till korrupt organisation — sinnelagsetikern hyllar handlingen, utilitaristen fördömer. A-nivå: visa att verifierbarhetsproblemet kan vara epistemiskt snarare än teoretiskt." },
+  "finalt": { term: "Finalt värde", cat: "Värdeteori",
+    l1: "Något som är värdefullt i sig självt.",
+    l2: "Ett slutgiltigt mål som inte behöver motiveras med något annat. Klassiska exempel: lycka, hälsa, kunskap. Motsatsen är instrumentella värden.",
+    l3: "Filosofisk tvist: vad är egentligen finalt? Mill: lust. Aristoteles: eudaimonia. Kant: den goda viljan. Att blanda ihop finalt och instrumentellt leder till logiska fel — t.ex. att kritisera utilitarismen för att handla om pengar, när pengar bara är instrumentellt i teorin.",
+    l4: "På provet: använd distinktionen för att dissekera argument. Om någon säger 'utilitarismen är girig' — svara att pengar inte är finalt värde i teorin utan instrumentellt medel för lycka. Detta visar A-nivå." },
+  "instrumentellt": { term: "Instrumentellt värde", cat: "Värdeteori",
+    l1: "Något värdefullt som medel för att något annat.",
+    l2: "Ett verktyg. Pengar har instrumentellt värde om de används för att nå trygghet. Det instrumentella värdet är beroende av ett finalt värde.",
+    l3: "Gränsen är inte alltid skarp. Vissa menar att inget är enbart instrumentellt. Andra att bara instrumentella värden finns (nihilism). Vänskap är både finalt (du vill ha vänner för deras skull) och instrumentellt (de hjälper dig).",
+    l4: "På provet: om en teori säger att X är finalt, fråga om X verkligen kan vara finalt. Om en teori menar att pengar är finalt, invänd att pengar per definition är ett medel. Begreppslig analys på A-nivå." },
+  "etisk_egoism": { term: "Etisk egoism", cat: "Normativ etik",
+    l1: "Handla så att det gynnar dig själv.",
+    l2: "En konsekvensetik: du ska välja handlingen som ger bäst konsekvenser för dig själv. Bygger på antagandet att människor söker sitt eget bästa — även när vi hjälper andra.",
+    l3: "Viktig distinktion: psykologisk egoism (deskriptivt) vs etisk egoism (normativt). Humes lag: man kan inte härleda 'bör' från 'är'. Kritik: kan inte lösa kollektiva problem. Upplyst egoism: långsiktigt egenintresse sammanfaller med samarbete.",
+    l4: "På provet: etisk egoism är konsekvensetik — skillnaden mot utilitarismen är VEM konsekvenserna gynnar (jag vs alla). A-nivå: visa att upplyst egoist inser att långsiktigt egenintresse sammanfaller med hjälp." },
+  "altruism": { term: "Altruism", cat: "Normativ etik",
+    l1: "Handla osjälviskt — tänk på andra.",
+    l2: "En konsekvensetik: handlingen är rätt om den ger så många bra konsekvenser som möjligt för så många som möjligt. Människan kan vara genuint osjälvisk.",
+    l3: "Stöds filosofiskt (empati är verklig) och biologiskt (samarbete ligger i vår natur). Skillnad mot utilitarism: altruismen kräver inte maximering. Kritik: altruism kan bli utnyttjad.",
+    l4: "På provet: koppla altruism till etisk egoism — båda är konsekvensetiska. A-nivå: en nyanserad slutsats erkänner att ren altruism riskerar att bli naiv; ömsesidig altruism är rimligare." },
+  "gyllene": { term: "Gyllene regeln", cat: "Regeletik",
+    l1: "Gör mot andra vad du vill att de ska göra mot dig.",
+    l2: "Traditionell etisk princip i kristendom, judendom, islam, konfucianism och hinduism. Matteusevangeliet 7:12.",
+    l3: "Kant kritiserade Gyllene regeln — den bygger på subjektiva önskningar (en masochist vill bli plågad). Gyllene regeln är INTE en underkategori till Kant — den är en självständig regeletisk princip. Att blanda ihop dem är ett vanligt elevfel.",
+    l4: "På provet: Gyllene regeln är innehållslig och beroende av subjektiva önskningar. Kants imperativ är formell och förnuftsbaserad. Båda är regeletiska, men Kant är striktare." },
+  "pliktetik": { term: "Pliktetik", cat: "Normativ etik",
+    l1: "Vissa handlingar är rätt eller fel i sig, oavsett konsekvenser.",
+    l2: "Kant (1724–1804) grundade pliktetiken. Moralen bygger på förnuftet. Det kategoriska imperativet: (1) handla så att din maxim kan bli allmän lag; (2) behandla aldrig en människa enbart som medel utan som mål i sig.",
+    l3: "Kants etik är deontologisk. Perfekta plikter (inte ljuga) är absoluta; imperfekta (hjälpa) ger utrymme för omdöme. Kritik: rigiditet — Kant själv menade att du inte får ljuga ens för att rädda en vän. Moderna kantianer (Nagel) erkänner moraliska trösklar.",
+    l4: "På provet: undvik karikatyren 'Kant = rigid'. A-nivå: visa att Kant har både perfekta och imperfekta plikter. I tiggande fallet: Kant kräver inte absolut att du hjälper, men att ignorera kvinnan är att underlåta att behandla henne som mål i sig." },
+  "hedonism": { term: "Hedonism", cat: "Livsstrategi",
+    l1: "Livet går ut på njutning.",
+    l2: "Lust och lycka är det enda finala värdet. Skilj kortvarig intensiv lust och långvarig trygg lycka. Mill skilde kvalitativ och kvantitativ lust.",
+    l3: "Huvudproblem: habitueringseffekten — vi vänjer oss snabbt vid förbättringar. Andra problem: njutningsmaskinen (skulle du koppla in dig? Många tvekar). Egoismkritik: hedonisten sätter sin egen lust främst.",
+    l4: "På provet: hedonism är LIVSSTRATEGI, inte normativ etik. A-nivå: koppla till eudaimonism — båda säger lycka är högsta goda men definierar det olika. Nj utningsmaskinen är det bästa testet." },
+  "eudaimonism": { term: "Eudaimonism", cat: "Värdeteori",
+    l1: "Livet går ut på att blomstra som människa.",
+    l2: "Aristoteles: högsta goda är eudaimonia — mänskligt blomstrande genom dygd och förnuft. Inte samma som lust — objektivt tillstånd vs subjektiv känsla.",
+    l3: "Skillnad mot hedonism: hedonisten söker upplevd lust, eudaimonisten förverkligande av potentialer. Man kan ha lust utan eudaimonia (njutningsmaskinen). Omvänt kan man uppnå eudaimonia i svåra omständigheter.",
+    l4: "På provet: skilj eudaimonism från dygdetik. Dygdetik = hur ska vi vara? Eudaimonism = vad är högsta goda? Aristoteles kombinerar båda, men analytiskt åtskilda." },
+  "stoicism": { term: "Stoicism", cat: "Livsstrategi",
+    l1: "Acceptera det du inte kan påverka.",
+    l2: "Yttre händelser styrs av ödet. Vi kan bara styra våra reaktioner. Möt tillvaron med förnuft och känslomässig kontroll (apati).",
+    l3: "Likheter med KBT: medvetenhet om sina känslor. Kritik: passivitet inför orättvisor. Svar: ansvar att göra det goda av sitt öde. Handlingsutrymmet är oklart.",
+    l4: "På provet: stoicismens bidrag är naturrätten — alla är lika inför ödet. A-nivå: jämför med existentialismen. Båda betonar inre hållning, men stoikern accepterar ödet, existentialisten förnekar det." },
+  "existentialism": { term: "Existentialism", cat: "Livsstrategi",
+    l1: "Du är fri att skapa dig själv.",
+    l2: "Sartre: existensen föregår essensen. Vi föds utan mening och skapar oss genom val. Kierkegaard, de Beauvoir. Centralt: existentiell ångest.",
+    l3: "Sartre: 'Människan är dömd till frihet.' Att skylla på ödet är 'dålig tro'. Kritik: förnekar socioekonomiska begränsningar. Svar: friheten gäller förhållningssättet.",
+    l4: "På provet: A-nivå: jämför med stoicism (båda betonar inre hållning) och nihilism (båda förnekar objektiv mening men existentialisten skapar mening). I njutningsmaskinen säger existentialisten nej — det är dålig tro." },
+  "situationsetik": { term: "Situationsetik", cat: "Existentialism",
+    l1: "Inga fasta regler — varje val är unikt.",
+    l2: "Varje moralisk situation är unik och kan inte lösas genom generella regler. Central inom existentialismen (Sartre).",
+    l3: "Skiljer sig från regeletik och pliktetik. Nära dygdetiken i att betona kontext. Sartre: varje val definierar vem du är. Kritik: utan regler, hur undviker vi godtycke? Svar: friheten är förenad med radikalt ansvar.",
+    l4: "På provet: A-nivå: situationsetik är inte moralisk relativism — relativismen säger moralen beror på kultur, situationsetiken att varje situation kräver ett unikt val." },
+  "existentiell": { term: "Existentiell ångest", cat: "Existentialism",
+    l1: "Ångesten över att vara ensam ansvarig för sitt liv.",
+    l2: "Inte psykologisk ångest utan djup insikt om att bara du ansvarar för dina val. Kierkegaard och Sartre.",
+    l3: "Ångesten är inte ett problem utan påminnelse om att du är människa. Att inte känna ångest är 'dålig tro'. Skillnaden mot psykologisk ångest: den existentiella försvinner inte när problemet är löst.",
+    l4: "På provet: A-nivå: existentiell ångest är positiv — den signalerar att du tar ansvar. En person utan ångest lever i illusion." },
+  "nihilism": { term: "Nihilism", cat: "Livsstrategi",
+    l1: "Inget har egentligen något värde.",
+    l2: "Ingen objektiv grund för kunskap, moral eller värden. Livet är meningslöst. Uppstod i Ryssland som politisk kritik. Deskriptiv, inte preskriptiv.",
+    l3: "Kritik: handlingsförlamning. Svar: nihilismen beskriver, den föreskriver inte. Självmotsägelsekritiken: om inget har värde, hur kan sanningen ha värde? Svar: fakta/värde-distinktionen (Humes lag) — men omdiskuterad.",
+    l4: "På provet: ge INTE nihilisten ett existentialistiskt svar. A-nivå: hantera självmotsägelsekritiken via Humes lag men erkänn att distinktionen är omtvistad." },
+  "moraliskt_subjekt": { term: "Moraliskt subjekt", cat: "Etik",
+    l1: "Den som kan handla moraliskt.",
+    l2: "Varelse med förnuft och fri vilja som kan bära moraliskt ansvar (vuxna tillräkneliga).",
+    l3: "Skilj från moraliskt objekt: subjektet handlar, objektet berörs. Spädbarn är moraliskt objekt men inte subjekt. Frågan om djur kan vara subjekt.",
+    l4: "På provet: använd för att analysera djurs moraliska status. Utilitarist: djur räknas i kalkylen. Kantian: djur har indirekt status. Dygdetiker: behandling av djur speglar karaktär." },
+  "moraliskt_objekt": { term: "Moraliskt objekt", cat: "Etik",
+    l1: "Den som berörs av moraliska handlingar.",
+    l2: "Varelse med intressen som kan känna lidande men inte bär moraliskt ansvar (spädbarn, djur).",
+    l3: "Att vara objekt betyder att ens lidande räknas. Vissa utvidgar kretsen till ekosystem, framtida generationer. Kritik: om allt är objekt, urvattnas begreppet.",
+    l4: "På provet: använd för abort, djurrätt, miljöetik. A-nivå: fostret är objekt med moralisk status; modern är subjekt med rätt att bestämma. Båda har stöd." },
+  "regelutilitarism": { term: "Regelutilitarism", cat: "Normativ etik",
+    l1: "Följ regler som över tid maximerar lyckan.",
+    l2: "Istället för att kalkylera varje handling, följ generella regler som i längden maximerar lyckan.",
+    l3: "Uppstod som svar på kritiken att handlingsutilitarism offrar rättigheter. Kritik: glider mot pliktetik. Svar: reglerna är motiverade av långsiktig nytta, inte absoluta.",
+    l4: "På provet: i tortyrfrågan — regelutilitaristen fördömer tortyr av systemiska skäl (undergräver rättsstaten). Kantianen av handlingens inre kränkning. Samma slutsats, olika grunder." },
+  "det_kategoriska": { term: "Det kategoriska imperativet", cat: "Normativ etik",
+    l1: "Gör bara sådant som alla andra också borde få göra.",
+    l2: "Kants ovillkorliga förnuftspåbud: (1) handla så att din maxim kan bli allmän lag; (2) behandla aldrig en människa enbart som medel utan som mål i sig.",
+    l3: "Skillnad mot Gyllene regeln: Kant kritiserade den för subjektiva önskningar. Formulering 1 är universaliseringstest; formulering 2 skyddar individens absoluta värde.",
+    l4: "På provet: imperativet är KATEGORISKT — gäller ovillkorligt, inte 'om du vill X'. Kant själv menade att lögn är fel även för att rädda vän, vilket moderna kantianer ifrågasätter." },
+  "stat": { term: "Stat", cat: "Samhällsfilosofi",
+    l1: "Ett land med lagar och gränser.",
+    l2: "Geografiskt område med rättsordning, medborgarskap och monopol på maktmedel (polis, militär). Både materiell och ickemateriell.",
+    l3: "Två huvudfunktioner: skydda internt och externt. Monopol på legitimt våld. Symboler skapar gemenskap. Kritik: kan bli förtryckarorgan. Anarkism: onödig. Libertarianism: minimera.",
+    l4: "På provet: skilj stat från nation. A-nivå: koppla till kosmopolitism — om alla är världsmedborgare, är staten instrument eller mål?" },
+  "nation": { term: "Nation", cat: "Samhällsfilosofi",
+    l1: "En kulturell gemenskap.",
+    l2: "Identitetsmässig gemenskap baserad på kultur, språk, historia — oberoende av statens gränser. Benedict Anderson: 'föreställd gemenskap'.",
+    l3: "Nationalism: nationen är primär. Kosmopolitism: mänskligheten. Kritik mot nationalism: främlingsfientlighet. Kritik mot kosmopolitism: bortser från faktiska band.",
+    l4: "På provet: nationen är subjektiv och kulturell. A-nivå: jämför nationalism och kosmopolitism — båda svar på 'vilken är den primära gemenskapen?'" },
+  "medborgare": { term: "Medborgare", cat: "Samhällsfilosofi",
+    l1: "En person som tillhör en stat.",
+    l2: "Juridisk och politisk status med fulla rättigheter och skyldigheter. Grund för samhällsgemenskapen.",
+    l3: "Både formell (rättigheter) och symbolisk (identitet). Kritik: exkluderande för icke-medborgare. Kosmopolitism: globalt medborgarskap.",
+    l4: "På provet: skilj juridiska rättigheter från kulturell tillhörighet. A-nivå: koppla till positiva/negativa rättigheter — välfärdsstat ger positiva, nattväktarstat främst negativa." },
+  "samhalle": { term: "Samhälle", cat: "Samhällsfilosofi",
+    l1: "Människor som lever tillsammans efter gemensamma regler.",
+    l2: "Sammanslutning med gemensamma regler och samhörighet. Krävs mer än bara en grupp på ett torg.",
+    l3: "Vad är gemensamt? Staten (juridisk), nationen (kulturell), världsmedborgarskapet (global). Spänning individ/kollektiv beror på människosyn.",
+    l4: "På provet: A-nivå: visa att du kan skilja samhälle, stat, nation. EU är ett exempel där de överlappar komplicerat." },
+  "varldsmedborgare": { term: "Världsmedborgare", cat: "Samhällsfilosofi",
+    l1: "En person som ser sig som tillhörande hela världen.",
+    l2: "Identifierar sig med globala mänskligheten snarare än specifik stat. Kosmopolitismens centrala begrepp.",
+    l3: "Inte juridisk status utan moralisk och kulturell hållning. Stoikerna var de första. Kritik: kan man känna samhörighet med 8 miljarder? Svar: moralisk gemenskap är inte samma som känslomässig närhet.",
+    l4: "På provet: A-nivå: i frågor om global rättvisa — ska rika länder hjälpa fattiga? Världsmedborgaren säger ja, nationalisten nej." },
+  "kosmopolitism": { term: "Kosmopolitism", cat: "Samhällsfilosofi",
+    l1: "Alla människor är världsmedborgare.",
+    l2: "Vi tillhör en global moralisk gemenskap med gemensamma rättigheter, oberoende av nationella gränser. Stoikerna formulerade idén.",
+    l3: "Varianter: moralisk (samma värde), politisk (globala institutioner), kulturell (öppenhet). Kritik: naiv. Svar: lokala band är viktiga men får inte innebära att andra värderas lägre.",
+    l4: "På provet: koppla till Rawls okunnighetens slöja — om du inte vet vilket land du föds i, vilka principer för global rättvisa väljer du? Kritik: Rawls begränsade själv slöjan till ett samhälle." },
+  "jamlikhet": { term: "Jämlikhet", cat: "Samhällsfilosofi",
+    l1: "Alla ska få lika mycket.",
+    l2: "Resurser och rättigheter fördelas lika. Kan avse lika utfall eller lika möjligheter.",
+    l3: "Kritik: minskar drivkrafter. Kan konflikta med frihet. Rawls differensprincip försöker förena jämlikhet och meriter: ojämlikhet är tillåten bara om den gynnar de sämst ställda.",
+    l4: "På provet: skilj lika utfall från lika möjligheter. A-nivå: för att lika möjligheter ska vara verkliga krävs positiva rättigheter (utbildning, vård), inte bara negativa." },
+  "meriter": { term: "Meriter", cat: "Samhällsfilosofi",
+    l1: "Belöning efter prestation.",
+    l2: "Resurser fördelas utifrån insats, skicklighet och ansvar.",
+    l3: "Kritik: skapar klassklyftor. Är mina meriter mina egna eller resultat av tur (gener, föräldrar, skolor)? Rawls: delvis tur — samhället bör kompensera. Nozick: arbetet är mitt, frukterna ska jag behålla.",
+    l4: "På provet: A-nivå: båda principerna är rimliga men oförenliga i ren form. Rawls differensprincip är ett försök att förena." },
+  "positiva": { term: "Positiva rättigheter", cat: "Rättighetsfilosofi",
+    l1: "Rätt till stöd och resurser.",
+    l2: "Rätt till resurser eller tjänster: sjukvård, utbildning, försörjning. Kräver aktiva handlingar från staten.",
+    l3: "Kritik: kräver skatt. Nozick liknar vid tvångsarbete. Svar: formell frihet utan reella möjligheter är tom. En svältande människa är inte fri.",
+    l4: "På provet: A-nivå: bakom okunnighetens slöja vet du inte om du föds fattig, därför väljer du positiva rättigheter. Nozick: du skulle vilja skydda framtida äganderätt." },
+  "negativa": { term: "Negativa rättigheter", cat: "Rättighetsfilosofi",
+    l1: "Rätt att lämnas i fred.",
+    l2: "Frihet från tvång: yttrandefrihet, äganderätt, rätten till liv. Nattväktarstaten bygger på enbart negativa.",
+    l3: "Kritik: lämnar svaga utan skyddsnät. Dessutom kräver även negativa rättigheter skatt (polis, domstol) — så de är inte helt 'negativa'.",
+    l4: "På provet: A-nivå: distinktionen positiva/negativa är inte så skarp som den verkar. Den verkliga frågan är var gränsen går — nattväktarstat eller välfärdsstat." },
+  "okunnighetens": { term: "Okunnighetens slöja", cat: "Samhällsfilosofi",
+    l1: "Bestäm regler utan att veta vem du blir.",
+    l2: "Rawls: välj samhällsregler utan att veta din framtida klass, kön, hälsa. Tvingar fram principer som skyddar de sämst ställda.",
+    l3: "Resultat: två principer — (1) lika grundläggande friheter, (2) ojämlikheter bara om de gynnar de sämst ställda (differensprincipen). Kritik: är tankeexperimentet realistiskt?",
+    l4: "På provet: använd för att argumentera för positiva rättigheter. A-nivå: pröva Nozicks libertarianism — skulle du bakom slöjan välja nattväktarstat?" },
+  "naturratt": { term: "Naturrätt", cat: "Rättighetsfilosofi",
+    l1: "Medfödda rättigheter som ingen kan ta ifrån dig.",
+    l2: "Okränkbara rättigheter givna av naturen, förnuftet eller ödet. Stoikerna formulerade idén.",
+    l3: "Grunden för mänskliga rättigheter. Kritik: varifrån kommer de? Bentham: 'nonsens på styltor'. Svar: grunden för kritik av orättfärdiga lagar — utan naturrätten kan vi inte säga att slaveri var fel även när det var lagligt.",
+    l4: "På provet: A-nivå: koppla till stoicismen och moderna människorättsdeklarationer. Är naturrätten objektiv sanning eller kulturell konstruktion?" },
+  "objektivism": { term: "Objektivism", cat: "Värdeteori",
+    l1: "Vissa värden finns oberoende av vad vi tycker.",
+    l2: "Moralisk realism: objektiva moraliska fakta finns. Platons godhetens idé.",
+    l3: "Underkategori till moralisk realism: naturalistisk (värden är naturliga fakta) eller non-naturalistisk (Platons former). Kritik: hur får vi kunskap om dem? Svar: genom förnuftet.",
+    l4: "På provet: A-nivå: hur förhåller sig objektivismen till moralisk oenighet? Svar: oenighet visar inte att sanning inte finns." }
+};
+
+/* ============================================================
+   TEORIER FÖR JÄMFÖRELSE
+   ============================================================ */
+const THEORIES_LIST = [
+  { id: "regeletik", name: "Regeletik" },
+  { id: "pliktetik", name: "Pliktetik (Kant)" },
+  { id: "dygdetik", name: "Dygdetik" },
+  { id: "sinnelagsetik", name: "Sinnelagsetik" },
+  { id: "konsekvensetik", name: "Konsekvensetik (generell)" },
+  { id: "etisk_egoism", name: "Etisk egoism" },
+  { id: "altruism", name: "Altruism" },
+  { id: "utilitarism", name: "Utilitarism" },
+  { id: "hedonism", name: "Hedonism" },
+  { id: "stoicism", name: "Stoicism" },
+  { id: "existentialism", name: "Existentialism" },
+  { id: "nihilism", name: "Nihilism" }
+];
+
+const THEORY_SUMMARY = {
+  regeletik: { name: "Regeletik", gr: "Moralen består av regler som inte får brytas. Motiveras religiöst, förnuftsmässigt eller yrkesmässigt.", beg: "Regel, plikt, Gyllene regeln, yrkesetik." },
+  pliktetik: { name: "Pliktetik (Kant)", gr: "Vissa handlingar är fel oavsett konsekvenser. Plikten är ovillkorlig och förnuftsbaserad.", beg: "Maxim, kategoriskt imperativ, plikt." },
+  dygdetik: { name: "Dygdetik", gr: "Fokus på aktörens karaktär. Dygden är medelvägen mellan ytterligheter.", beg: "Dygd, medelväg, phronesis, eudaimonia." },
+  sinnelagsetik: { name: "Sinnelagsetik", gr: "Handlingens moraliska värde avgörs av avsikten.", beg: "Sinnelag, avsikt, goda skäl." },
+  konsekvensetik: { name: "Konsekvensetik (generell)", gr: "Handlingens moraliska värde avgörs helt av dess konsekvenser.", beg: "Konsekvens, nettonytta, utfall." },
+  etisk_egoism: { name: "Etisk egoism", gr: "Handla så att konsekvenserna blir bäst för dig själv.", beg: "Egenintresse, upplyst egoism." },
+  altruism: { name: "Altruism", gr: "Handla så att konsekvenserna blir bäst för andra.", beg: "Osjälviskhet, empati, samarbete." },
+  utilitarism: { name: "Utilitarism", gr: "Handla så att sammanlagd lycka maximeras.", beg: "Nytta, nettonytta, kvalitativ/kvantitativ lust." },
+  hedonism: { name: "Hedonism", gr: "Lust är det enda finala värdet.", beg: "Lust, habituering, njutningsmaskin." },
+  stoicism: { name: "Stoicism", gr: "Yttre ting styrs av ödet — fokusera på dina reaktioner.", beg: "Öde, apati, naturliga rättigheter." },
+  existentialism: { name: "Existentialism", gr: "Existensen föregår essensen — vi skapar oss genom val.", beg: "Frihet, val, ansvar, existentiell ångest." },
+  nihilism: { name: "Nihilism", gr: "Ingen objektiv grund för kunskap, moral eller värden.", beg: "Meningslöshet, konstruerade värden." }
+};
+
+/* ============================================================
+   KOMPLETTA JÄMFÖRELSER — alla 34 par
+   ============================================================ */
+const COMPARISONS = {
+  /* ============ GRUPP 1: Normativ etik ============ */
+
+  "regeletik|pliktetik": {
+    e: `<p>Båda är regeletiska: moralen består av regler som inte får brytas. Men <b>pliktetiken är en specifik form av regeletik</b> där plikterna härleds från förnuftet (Kant). Regeletik i vid mening kan motiveras religiöst, yrkesmässigt eller traditionellt.</p>
+    <p>Gyllene regeln är en regeletisk princip byggd på önskningar. Kants kategoriska imperativ är regeletisk men strikt förnuftsbaserad. Båda säger "gör X", men av olika skäl.</p>`,
+    c: `<p><b>Utförligare:</b> Skillnaden syns i hur reglerna motiveras. Kants imperativ bygger på universaliseringstestet — om en maxim inte kan bli allmän lag utan motsägelse är handlingen fel. Gyllene regeln bygger på vad du själv vill att andra ska göra mot dig — vilket Kant kritiserade, eftersom en masochist då skulle plåga andra.</p>
+    <p>Regeletik i vid mening omfattar även yrkesetik (läkaretik, läraretik) som inte grundas på förnuft utan på rollspecifika plikter.</p>
+    <p><b>Invändningar:</b> Regeletiken i vid mening blir otydlig — vilka regler gäller? Pliktetiken blir rigid — Kant förbjuder lögn även för att rädda liv.</p>`,
+    a: `<p><b>A-nivå:</b> Den filosofiskt viktigaste skillnaden är att regeletik är en familj av teorier medan pliktetik är en specifik teori inom familjen. Att påstå att de är samma sak är ett filosofiskt fel.</p>
+    <p><b>Testfråga:</b> Om en yrkesregel (läkaretik) krockar med en förnuftsplikt (att rädda liv), vilken vinner? För en regeletiker kan yrkesplikten vara absolut inom sin sfär. För en Kantian måste varje maxim prövas förnuftsmässigt.</p>
+    <p><b>Slutsats:</b> Pliktetiken är den striktaste formen av regeletik — alla regler måste klara universaliseringstestet. Andra regeletiska system kan bygga på tradition eller roll. Att kalla Kant för "en regeletiker" är korrekt men reducerande.</p>`
+  },
+  "regeletik|dygdetik": {
+    e: `<p>Regeletik frågar <i>vilka regler ska följas?</i> Dygdetik frågar <i>hur ska en god människa vara?</i></p>
+    <p>Regeletikern söker en regel att följa. Dygdetikern söker en karaktär att utveckla.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-konsekventialistiska, men de riktar sig till olika objekt. Regeletik bedömer handlingar mot regler; dygdetik bedömer karaktärer mot dygder.</p>
+    <p><b>Regeletikens argument:</b> Utan fasta regler uppstår godtycke. Regler skyddar mot mänsklig svaghet.</p>
+    <p><b>Dygdetikens argument:</b> En person kan följa alla regler utan att vara moralisk (karikatyr av "regellydig"). Moral kräver inre hållning.</p>
+    <p><b>Invändningar:</b> Regeletik: vad när två regler krockar? Dygdetik: vad ska jag konkret göra i ett dilemma?</p>`,
+    a: `<p><b>A-nivå:</b> Den djupare skillnaden är att regeletiken bygger på yttre normer (regler som ska följas), medan dygdetiken bygger på inre karaktär (dygder som ska odlas). Regeletikern kan bli moralisk av rädsla för straff; dygdetikern blir moralisk av vana och fostran.</p>
+    <p><b>Avgörande fall:</b> En person som ärligt vill hjälpa men bryter en regel — regeletikern fördömer handlingen, dygdetikern bedömer karaktären bakom. En person som följer alla regler av kall beräkning — regeletikern godkänner, dygdetikern ifrågasätter.</p>
+    <p><b>Slutsats:</b> Regeletik och dygdetik kompletterar varandra. Regeletik ger samhällelig förutsägbarhet (juridik, yrkesetik). Dygdetik ger moralisk fostran (skola, familj). En fullständig etik behöver båda.</p>`
+  },
+  "regeletik|sinnelagsetik": {
+    e: `<p>Regeletik bedömer handlingar efter regler. Sinnelagsetik bedömer handlingar efter avsikt.</p>
+    <p>Regeletikern säger "följ regeln". Sinnelagsetikern säger "menade du väl?"</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-konsekventialistiska, men de skiljer sig fundamentalt i vad de bedömer. Regeletikern bryr sig om handlingen motsvarar regeln; sinnelagsetikern bryr sig om avsikten bakom handlingen.</p>
+    <p><b>Regeletikens argument:</b> Utan regler uppstår moralisk anarki. Vi behöver fasta normer.</p>
+    <p><b>Sinnelagsetikens argument:</b> Vi kan aldrig kontrollera alla konsekvenser. Det enda vi säkert kan bedöma är avsikten.</p>
+    <p><b>Invändningar:</b> Regeletik: kan bli rigid vid konflikter. Sinnelagsetik: efterrationalisering — hur vet vi att avsikten var god?</p>`,
+    a: `<p><b>A-nivå:</b> Den avgörande skillnaden är att regeletik bygger på objektiva normer (regler gäller oavsett vem som handlar), medan sinnelagsetik bygger på subjektiva avsikter (bedömningen är knuten till personen).</p>
+    <p><b>Avgörande fall:</b> En läkare som av misstag ger fel medicin. Sinnelagsetikern: god avsikt, handlingen är ursäktlig. Regeletikern: läkaretikens regler bröts, handlingen är felaktig även om avsikten var god.</p>
+    <p><b>Slutsats:</b> Regeletik och sinnelagsetik besvarar olika frågor. Regeletik: vilka handlingar ska vi tillåta i samhället? Sinnelagsetik: hur bedömer jag min egen moraliska kvalitet? Båda behövs, men för olika ändamål.</p>`
+  },
+  "regeletik|konsekvensetik": {
+    e: `<p>Regeletik: handlingar bedöms efter regler. Konsekvensetik: handlingar bedöms efter resultat.</p>
+    <p>Regeletikern: "följ regeln, oavsett utfall". Konsekvensetikern: "välj det som ger bäst resultat".</p>`,
+    c: `<p><b>Utförligare:</b> Detta är en av de mest grundläggande motsättningarna i etiken. Regeletikern menar att vissa handlingar är rätt/fel i sig; konsekvensetikern att bara utfallet räknas.</p>
+    <p><b>Regeletikens argument:</b> Konsekvenser är osäkra. Regler ger förutsägbarhet och skydd mot godtycke.</p>
+    <p><b>Konsekvensetikens argument:</b> Det är orimligt att följa regler som leder till lidande. Om en regel inte tjänar mänskligt välbefinnande, varför följa den?</p>
+    <p><b>Invändningar:</b> Regeletik: kan bli rigid (sanning även när den skadar). Konsekvensetik: kan offra enskilda för kollektiv nytta.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden är djup och principiell. Regeletikern menar att moralen är deontologisk — plikter gäller oavsett utfall. Konsekvensetikern menar att moralen är teleologisk — handlingar är medel för att uppnå gott.</p>
+    <p><b>Avgörande fall — tiggande:</b> Regeletikern frågar om plikten att hjälpa nödställda är en regel. Konsekvensetikern frågar vilket val som maximerar nyttan.</p>
+    <p><b>Filosofisk grund:</b> Regeletikern accepterar att vissa handlingar aldrig får utföras (tortyr, mord). Konsekvensetikern accepterar att alla handlingar är tillåtna om de ger tillräckligt bra resultat.</p>
+    <p><b>Slutsats:</b> Denna konflikt är inte avgjord. Moderna hybrider (regelutilitarism, tröskeldeontologi) försöker förena båda. En rimlig position: absoluta rättigheter för grundläggande skydd + konsekvenskalkyler för marginella beslut.</p>`
+  },
+  "regeletik|etisk_egoism": {
+    e: `<p>Regeletik: följ regler som gäller för alla. Etisk egoism: handla så att du själv gynnas.</p>
+    <p>Regeletikern är opartisk; egoisten är partisk för sig själv.</p>`,
+    c: `<p><b>Utförligare:</b> Båda kan vara icke-konsekventialistiska eller konsekventialistiska — men på olika sätt. Regeletik bygger på regler; egoismen på egenintresse.</p>
+    <p><b>Regeletikens argument:</b> Regler skyddar mot att den starke tar för sig. De är opartiska.</p>
+    <p><b>Egoismens argument:</b> Alla handlingar är i grunden egoistiska. Även att följa regler görs för egen vinning (undvika straff, få rykte).</p>
+    <p><b>Invändningar:</b> Regeletik: kan bli blind för konsekvenser. Egoismen: kan inte lösa kollektiva problem (tragedy of the commons).</p>`,
+    a: `<p><b>A-nivå:</b> Regeletik och etisk egoism är fundamentalt oförenliga som moralteorier. Regeletikern kräver opartiskhet — regler gäller alla lika. Egoisten kräver partiskhet — min nytta är målet.</p>
+    <p><b>Avgörande fall:</b> En person kan följa alla regler av egoistiska skäl (undvika straff). Är hen moralisk? Regeletikern: ja, yttre handling räcker. Egoisten: ja, eftersom hen gör det för egen vinning. Båda accepterar handlingen men av olika skäl.</p>
+    <p><b>Slutsats:</b> Upplyst egoism kan i praktiken sammanfalla med regeletik, eftersom långsiktigt egenintresse ofta kräver samarbete. Skillnaden är motiveringen: regeletikern följer regler för att de är regler; egoisten för att det lönar sig.</p>`
+  },
+  "regeletik|altruism": {
+    e: `<p>Regeletik: följ fasta regler. Altruism: handla för andras bästa.</p>
+    <p>Regeletikern kan följa en regel som skadar andra (sanning som sårar). Altruisten väljer alltid det som gynnar andra.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är moraliska teorier som riktar sig utanför jaget, men på olika sätt. Regeletiken är opartisk-regelstyrd; altruismen är opartisk-välvillig.</p>
+    <p><b>Regeletikens argument:</b> Regler skyddar alla lika. Utan regler uppstår godtycke.</p>
+    <p><b>Altruismens argument:</b> Moral handlar om att minska lidande. Regler som skadar andra är fel, oavsett hur etablerade de är.</p>
+    <p><b>Invändningar:</b> Regeletik: kan bli blind för lidande. Altruism: kan bli naiv och utnyttjad.</p>`,
+    a: `<p><b>A-nivå:</b> Regeletik och altruism kan sammanfalla (regler som "hjälp nödställda") men skiljer sig i grunden. Regeletikern motiverar handlingen med regeln; altruisten med andras välbefinnande.</p>
+    <p><b>Avgörande fall:</b> En regel som förbjuder lögn kan skada en oskyldig. Regeletikern följer regeln ändå; altruisten ljuger för att rädda personen.</p>
+    <p><b>Slutsats:</b> Regeletik är formell (regler), altruism är materiell (andras väl). Altruismen är öppnare för kontext; regeletiken ger förutsägbarhet. Båda är moraliska men kompletterar varandra på olika plan.</p>`
+  },
+  "regeletik|utilitarism": {
+    e: `<p>Regeletik: följ regler. Utilitarism: maximera sammanlagd lycka.</p>
+    <p>Regeletikern följer regler även när de ger sämre utfall. Utilitaristen bryter regler när det ger bättre utfall.</p>`,
+    c: `<p><b>Utförligare:</b> Regeletik är icke-konsekventialistisk (regler gäller oavsett utfall); utilitarism är konsekventialistisk (utfallet avgör). Regelutilitarism är en hybrid som försöker förena dem.</p>
+    <p><b>Regeletikens argument:</b> Regler ger förutsägbarhet. Utan dem uppstår godtycke och maktmissbruk.</p>
+    <p><b>Utilitarismens argument:</b> Regler är bara medel. Om de inte maximerar lycka bör de ändras.</p>
+    <p><b>Invändningar:</b> Regeletik: rigid vid katastrofer. Utilitarism: kan offra enskilda individer.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden ligger i vad som är moralens grund. Regeletikern: regler. Utilitaristen: utfallet. Regelutilitaristen intar en mellanposition: följ regler som över tid maximerar lyckan.</p>
+    <p><b>Avgörande fall — tortyr:</b> Handlingsutilitaristen tillåter tortyr om det räddar en miljon. Regeletikern förbjuder tortyr — tortyrförbudet är absolut. Regelutilitaristen förbjuder tortyr — en regel som tillåter tortyr undergräver samhället på sikt.</p>
+    <p><b>Slutsats:</b> Regeletik skyddar mänskliga rättigheter bättre; utilitarismen ger större flexibilitet i extrema situationer. En rimlig position är att vissa regler (tortyrförbud, mordförbud) är absoluta, medan andra kan vägas mot konsekvenser.</p>`
+  },
+  "pliktetik|dygdetik": {
+    e: `<p>Båda avvisar konsekvensetik men av olika skäl. Pliktetiken frågar efter rätt handling (regel). Dygdetiken frågar efter god karaktär.</p>
+    <p>Kantianen: vad är min plikt? Dygdetikern: hur handlar en god människa?</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-konsekventialistiska, men skiljer sig i VAD de bedömer. Pliktetiken bedömer enskilda handlingar mot universella regler. Dygdetiken bedömer aktörens karaktär över tid.</p>
+    <p><b>Pliktetikens styrka:</b> Klar vägledning — det finns en regel. <b>Dygdetikens styrka:</b> Fångar moralisk mognad.</p>
+    <p><b>Svagheter:</b> Pliktetiken: rigiditet. Dygdetiken: vaghet.</p>
+    <p><b>Svar:</b> Kantianen rangordnar plikter; dygdetikern hänvisar till phronesis.</p>`,
+    a: `<p><b>A-nivå:</b> Den djupare konflikten handlar om moralens primära objekt. Pliktetiken: moralen är en uppsättning regler för handlingar (universell, opartisk). Dygdetiken: moralen är fråga om karaktär och livsform (personlig, kontextuell).</p>
+    <p><b>Avgörande prövning:</b> En person som följer alla regler men saknar empati — är hen moralisk? Pliktetikern: ja. Dygdetikern: nej, för moralen kräver inre hållning.</p>
+    <p><b>Varför båda behövs:</b> Pliktetiken ger skydd för rättigheter — vissa handlingar får aldrig utföras. Dygdetiken ger karaktärsbildning — hur vi blir människor som inte ens vill tortera.</p>
+    <p><b>Slutsats:</b> En fullständig moralteori behöver båda. Rawls okunnighetens slöja ger en syntes: bakom slöjan väljer du både rättigheter (pliktetik) och en karaktärsbildning (dygdetik).</p>`
+  },
+  "pliktetik|sinnelagsetik": {
+    e: `<p>Pliktetik: bedömer handlingen mot en regel. Sinnelagsetik: bedömer avsikten bakom handlingen.</p>
+    <p>Kantianen: bröt du regeln? Sinnelagsetikern: menade du väl?</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-konsekventialistiska men på olika sätt. Kantianen fokuserar på handlingens princip (maxim), sinnelagsetikern på handlingens motiv (avsikt).</p>
+    <p><b>Pliktetikens argument:</b> Utan universella regler uppstår godtycke. En maxim måste kunna bli allmän lag.</p>
+    <p><b>Sinnelagsetikens argument:</b> Vi kan aldrig säkert veta konsekvenserna. Det enda vi kan kontrollera är vår avsikt.</p>
+    <p><b>Invändningar:</b> Pliktetik: rigid. Sinnelagsetik: efterrationalisering — hur verifiera avsikt?</p>`,
+    a: `<p><b>A-nivå:</b> Båda är "intentionalistiska" — de bryr sig om mer än utfall. Men de skiljer sig i vad de bedömer. Kantianen bedömer handlingens princip (kan den universaliseras?). Sinnelagsetikern bedömer aktörens motiv (menade hen väl?).</p>
+    <p><b>Avgörande fall:</b> En person som ljuger för att rädda en vän. Pliktetikern: fel — lögn kan inte bli allmän lag. Sinnelagsetikern: rätt — avsikten var god (rädda vän).</p>
+    <p><b>Filosofisk grund:</b> Kantianen tror att moralen är rationell (förnuftet avgör). Sinnelagsetikern tror att moralen är intentionell (viljan avgör).</p>
+    <p><b>Slutsats:</b> Sinnelagsetik är mer flexibel men svagare på verifiering. Pliktetik är striktare men opersonligare. En rimlig position: pliktetik för samhällelig reglering, sinnelagsetik för personlig moralisk självrannsakan.</p>`
+  },
+  "pliktetik|konsekvensetik": {
+    e: `<p>Pliktetik: handlingar bedöms i sig (deontologi). Konsekvensetik: handlingar bedöms efter utfall (teleologi).</p>
+    <p>Kantianen: vissa handlingar är fel oavsett utfall. Konsekvensetikern: utfallet avgör allt.</p>`,
+    c: `<p><b>Utförligare:</b> Detta är etikens huvudmotsättning. Pliktetiken menar att moralen bygger på plikter som gäller oavsett utfall. Konsekvensetiken menar att moralen bygger på att göra världen bättre.</p>
+    <p><b>Pliktetikens argument:</b> Konsekvenser är osäkra. Förnuftet ger en stabilare moral.</p>
+    <p><b>Konsekvensetikens argument:</b> Det är orimligt att följa regler som orsakar lidande.</p>
+    <p><b>Invändningar:</b> Pliktetik: rigid vid regelkonflikter. Konsekvensetik: kan offra enskilda individer.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden ligger i om moralen är före eller efter handlingen. Pliktetiken bedömer handlingen i förväg (utifrån dess maxim). Konsekvensetiken bedömer i efterhand (utifrån utfallet).</p>
+    <p><b>Avgörande fall — lögn:</b> Kantianen förbjuder lögn även för att rädda en vän. Konsekvensetikern tillåter lögnen om den räddar liv. Båda har filosofiskt starka skäl.</p>
+    <p><b>Kants svar:</b> Om vi tillåter lögn i ett enskilt fall, urholkar vi sanningens institution. Konsekvensetikerns svar: institutioner är medel, människors väl är mål.</p>
+    <p><b>Slutsats:</b> Pliktetik skyddar rättigheter bättre; konsekvensetik hanterar komplexa situationer bättre. Moderna hybrider (regelutilitarism, tröskeldeontologi) försöker förena båda. Frågan förblir filosofiskt öppen.</p>`
+  },
+  "pliktetik|etisk_egoism": {
+    e: `<p>Pliktetik: handla efter opartiska regler. Etisk egoism: handla för egen vinning.</p>
+    <p>Kantianen är opartisk; egoisten partisk.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är teoretiskt icke-konsekventialistiska men av olika skäl. Pliktetik: förnuftets krav. Egoism: egenintressets krav.</p>
+    <p><b>Pliktetikens argument:</b> Förnuftet kräver universalisering. En maxim som inte kan bli allmän lag är fel.</p>
+    <p><b>Egoismens argument:</b> Alla handlingar är i grunden egoistiska. Att hjälpa andra gör vi för att själva må bra.</p>
+    <p><b>Invändningar:</b> Pliktetik: rigid. Egoismen: kan inte lösa kollektiva problem.</p>`,
+    a: `<p><b>A-nivå:</b> Pliktetik och etisk egoism är grundläggande oförenliga. Kantianen kräver opartiskhet — regler gäller alla lika. Egoisten kräver partiskhet — min nytta är målet.</p>
+    <p><b>Kants test:</b> En maxim "handla alltid för egen vinning" kan inte bli allmän lag — om alla gjorde det skulle samarbete kollapsa. Därför är egoismen irrationell enligt Kant.</p>
+    <p><b>Egoistens svar:</b> Upplyst egoism — långsiktigt egenintresse kräver samarbete. I praktiken sammanfaller egoismen med vissa plikter, men motiveringen är olika.</p>
+    <p><b>Slutsats:</b> Skillnaden är djup och filosofiskt avgörande. Kantianen handlar rätt för att det är rätt; egoisten för att det lönar sig. I praktiken kan beteendet vara identiskt, men den moraliska kvaliteten skiljer sig.</p>`
+  },
+  "pliktetik|altruism": {
+    e: `<p>Pliktetik: handlingar bedöms efter universella regler. Altruism: handlingar bedöms efter hur de gynnar andra.</p>
+    <p>Kantianen: följ plikten. Altruisten: hjälp andra.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-egoistiska, men de skiljer sig i motivering. Pliktetik motiveras av förnuftet; altruism av empati.</p>
+    <p><b>Pliktetikens argument:</b> Förnuftet ger en opartisk moral. Känslor är opålitliga.</p>
+    <p><b>Altruismens argument:</b> Moral är rotad i empati och omsorg. Regler utan känsla blir kalla och omänskliga.</p>
+    <p><b>Invändningar:</b> Pliktetik: kan bli känslokall (Kants moraluppfattning kritiseras ofta för att sakna empati). Altruism: riskerar att utnyttjas.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden ligger i moralens källa. Kantianen: förnuftet. Altruisten: empatin. Båda är icke-egoistiska men på olika grunder.</p>
+    <p><b>Avgörande fall:</b> Att hjälpa en nödställd. Kantianen: imperfekt plikt att bistå nödställda. Altruisten: empati och omsorg om den nödställde. Samma handling, olika motiv.</p>
+    <p><b>Filosofisk kritik:</b> Kant själv kritiserades för att utesluta känslor ur moralen. Altruisten invänder att empati är moralens rot. Kantianen svarar: känslor är opålitliga; bara förnuftet ger universalitet.</p>
+    <p><b>Slutsats:</b> Pliktetik och altruism kan sammanfalla i handling men skiljer sig i motivation. En rimlig position: förnuftet ger moralens struktur, empatin ger dess värme. Utan båda blir moralen ofullständig.</p>`
+  },
+  "pliktetik|utilitarism": {
+    e: `<p>Både lika och olika. Likhet: båda avvisar egoism och kräver ett opartiskt perspektiv. Skillnad: utilitarismen är konsekvensetisk (bedömer utfall), pliktetiken deontologisk (bedömer handling).</p>`,
+    c: `<p><b>Utförligare:</b> Både lika och olika. Likhet: båda avvisar egoism och kräver ett opartiskt perspektiv. Skillnad: utilitarismen är konsekvensetisk (bedömer utfall), pliktetiken deontologisk (bedömer handling).</p>
+    <p><b>Utilitarismens argument:</b> Det är orimligt att följa regler som orsakar lidande. Om en lögn räddar en oskyldig, varför förbjuda den?</p>
+    <p><b>Pliktetikens argument:</b> Konsekvenser är osäkra; förnuftet ger en stabil moral. Om vi tillåter enskilda offras, urholkas människans absoluta värde.</p>
+    <p><b>Invändningar:</b> Utilitarismen: kan offra oskyldiga. Pliktetiken: rigid vid regelkonflikter.</p>
+    <p><b>Svar:</b> Utilitaristen: regelutilitarism. Kantianen: rangordning av plikter och moraliska trösklar.</p>`,
+    a: `<p><b>A-nivå:</b> Den djupare skillnaden ligger i vad de anser vara moralens grund. Utilitaristen menar att moralen handlar om att göra världen bättre (konsekvensialism). Kantianen menar att moralen handlar om att respektera människans värdighet (deontologi).</p>
+    <p><b>Tortyrdilemmat:</b> Handlingsutilitaristen tillåter tortyr om nettonyttan är positiv. Regelutilitaristen fördömer — en regel som tillåter tortyr undergräver rättsstaten. Klassisk Kantian fördömer absolut — tortyr behandlar människan som medel. Modern kantianism (Nagel) erkänner moraliska trösklar.</p>
+    <p><b>Varför samma slutsats av olika skäl:</b> Regelutilitaristen och kantianen landar båda i "tortyr är fel" — men regelutilitaristen av systemiska skäl, kantianen för att handlingen själv kränker människan. Att visa denna skillnad är A-nivå.</p>
+    <p><b>Slutsats:</b> Kantianen ger starkast skydd för individen. Utilitarismen förklarar bättre varför samhällen behöver regler. Båda är ofullständiga: utilitarismen saknar rättighetsskydd, pliktetiken saknar vägledning vid regelkonflikter. En rimlig hybrid: absoluta rättigheter för grundläggande skydd + nyttokalkyler för marginella beslut.</p>`
+  },
+  "dygdetik|sinnelagsetik": {
+    e: `<p>Dygdetik: bedömer karaktären (hur bör jag vara?). Sinnelagsetik: bedömer avsikten (menade jag väl?).</p>
+    <p>Båda tittar på inre egenskaper men fokuserar olika: dygdetik på stabila karaktärsdrag, sinnelagsetik på enskilda avsikter.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-konsekventialistiska men bedömer olika saker. Dygdetiken tittar på karaktären över tid (vem är du?), sinnelagsetiken på enskilda handlingars avsikt (vad menade du?).</p>
+    <p><b>Dygdetikens argument:</b> En god människa handlar gott av karaktär, inte bara av enskilda goda avsikter. Dygd är en stabil egenskap.</p>
+    <p><b>Sinnelagsetikens argument:</b> Det centrala är att vilja det goda. Om avsikten är god är handlingen moraliskt god.</p>
+    <p><b>Invändningar:</b> Dygdetik: vagt. Sinnelagsetik: efterrationalisering.</p>`,
+    a: `<p><b>A-nivå:</b> Dygdetik och sinnelagsetik skiljer sig i tidsperspektiv. Sinnelagsetiken bedömer enskilda handlingars avsikt. Dygdetiken bedömer långsiktig karaktärsbildning.</p>
+    <p><b>Avgörande fall:</b> En person som generellt är självisk men ibland har goda avsikter. Sinnelagsetikern: bedömer handling för handling. Dygdetikern: personen saknar god karaktär, även om enskilda handlingar kan vara goda.</p>
+    <p><b>Filosofisk grund:</b> Båda kritiserar ren konsekvensetik. Men dygdetiken ser moralen som en livsuppgift; sinnelagsetiken som en sekvens av intentioner.</p>
+    <p><b>Slutsats:</b> Dygdetik är rikare — den fångar att moral handlar om vem du är, inte bara vad du gör. Sinnelagsetik är enklare men reducerande. I praktiken kompletterar de varandra: dygdetik för fostran, sinnelagsetik för konkreta bedömningar.</p>`
+  },
+  "dygdetik|konsekvensetik": {
+    e: `<p>Dygdetik: bedömer karaktär. Konsekvensetik: bedömer utfall.</p>
+    <p>Dygdetikern: hur bör jag vara? Konsekvensetikern: vad ger bäst resultat?</p>`,
+    c: `<p><b>Utförligare:</b> Dygdetik är agent-fokuserad; konsekvensetik är handling-fokuserad. Dygdetiken bedömer personen över tid; konsekvensetiken bedömer handlingen här och nu.</p>
+    <p><b>Dygdetikens argument:</b> Moral är en fråga om karaktär, fostran och vana. Goda handlingar kommer från goda människor.</p>
+    <p><b>Konsekvensetikens argument:</b> Vad spelar det för roll vem du är om dina handlingar skadar? Utfallet är vad som räknas.</p>
+    <p><b>Invändningar:</b> Dygdetik: vagt. Konsekvensetik: kan offra enskilda, svårt att beräkna.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden är djup och filosofiskt central. Dygdetiken menar att moralens grund är aktörens karaktär; konsekvensetiken att den är handlingens utfall.</p>
+    <p><b>Avgörande fall — tortyr:</b> Konsekvensetikern frågar vad som maximerar nyttan. Dygdetikern frågar vad en dygdig människa skulle göra. Båda kan komma till olika svar: konsekvensetikern kan tillåta tortyr; dygdetikern menar att tortyr förstör karaktären.</p>
+    <p><b>Filosofisk kritik:</b> Dygdetiken kritiseras för att inte kunna hantera akuta dilemman. Konsekvensetiken kritiseras för att reducera moral till kalkyl.</p>
+    <p><b>Slutsats:</b> Dygdetiken är rikare men mindre handlingsvägledande. Konsekvensetiken är handlingsinriktad men tunnare. En rimlig position: dygdetik för livshållning, konsekvensetik för konkreta beslut. Ansvar och karaktär hänger samman.</p>`
+  },
+  "dygdetik|etisk_egoism": {
+    e: `<p>Dygdetik: fokus på karaktär och andras väl. Etisk egoism: fokus på egen vinning.</p>
+    <p>Dygdetikern utvecklar goda egenskaper; egoisten maximerar sin egen nytta.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är agent-fokuserade (de handlar om personen), men de skiljer sig i målet. Dygdetiken: god karaktär. Egoismen: maximal egen nytta.</p>
+    <p><b>Dygdetikens argument:</b> En god människa blomstrar genom dygd. Själviskhet skadar både dig och andra.</p>
+    <p><b>Egoismens argument:</b> Alla handlingar är i grunden egoistiska. Dygd kan vara ett medel för eget välmående.</p>
+    <p><b>Invändningar:</b> Dygdetik: vagt. Egoism: kan inte lösa kollektiva problem.</p>`,
+    a: `<p><b>A-nivå:</b> Dygdetik och etisk egoism kan delvis sammanfalla: att leva dygdigt kan vara det bästa för ens eget välmående (Aristoteles menade att eudaimonia är det högsta goda för individen). Men motiveringarna skiljer sig.</p>
+    <p><b>Avgörande fråga:</b> Är dygd ett mål i sig eller ett medel för eget väl? Dygdetikern: mål i sig. Egoisten: medel för egen nytta.</p>
+    <p><b>Filosofisk skillnad:</b> Egoisten handlar för att gynna sig själv. Dygdetikern handlar för att förverkliga sin karaktär. Om dygd kräver uppoffring, väljer egoisten uppoffringen bara om den lönar sig långsiktigt; dygdetikern väljer den för att den är del av ett gott liv.</p>
+    <p><b>Slutsats:</b> Upplyst egoism kan ligga nära dygdetik i praktiken men är filosofiskt åtskild. Dygdetiken är rikare; egoismen är enklare men reducerande.</p>`
+  },
+  "dygdetik|altruism": {
+    e: `<p>Dygdetik: fokus på karaktär. Altruism: fokus på andras väl.</p>
+    <p>Dygdetikern utvecklar generositet; altruisten handlar osjälviskt.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är icke-egoistiska men på olika grunder. Dygdetiken: generositet är en dygd. Altruismen: andras väl är målet.</p>
+    <p><b>Dygdetikens argument:</b> En god människa odlar omsorg och empati. Dygden gör handlingen.</p>
+    <p><b>Altruismens argument:</b> Det moraliska kravet är att handla för andras bästa. Empati är motorn.</p>
+    <p><b>Invändningar:</b> Dygdetik: vagt. Altruism: kan bli utnyttjad.</p>`,
+    a: `<p><b>A-nivå:</b> Dygdetik och altruism är nära besläktade — båda betonar omsorg om andra. Skillnaden är att dygdetiken betonar personens karaktär (vem du är) medan altruismen betonar handlingens inriktning (vem den gynnar).</p>
+    <p><b>Avgörande fall:</b> En person som hjälper andra av pliktkänsla men utan empati. Altruisten: handlingen är god, för den gynnar andra. Dygdetikern: karaktären är ofullständig — empati saknas.</p>
+    <p><b>Filosofisk kritik:</b> Dygdetiken kan bli elitistisk (fokus på individens utveckling). Altruismen kan bli självutplånande (fokus på andras väl till priset av ens eget).</p>
+    <p><b>Slutsats:</b> Dygdetik och altruism kompletterar varandra. Dygdetiken ger empatin en plats i personligheten; altruismen ger den ett mål utanför jaget.</p>`
+  },
+  "dygdetik|utilitarism": {
+    e: `<p>Dygdetik: bedömer karaktär. Utilitarism: bedömer utfall.</p>
+    <p>Dygdetikern: hur bör jag vara? Utilitaristen: vad maximerar lyckan?</p>`,
+    c: `<p><b>Utförligare:</b> Dygdetik är agent-fokuserad; utilitarism är handling-fokuserad. Dygdetiken betonar god karaktär över tid; utilitarismen enskilda handlingars nytta.</p>
+    <p><b>Dygdetikens argument:</b> En god människa handlar gott av karaktär. Utan dygd blir nyttokalkylen kall och omänsklig.</p>
+    <p><b>Utilitarismens argument:</b> Karaktär är bara relevant om den leder till bättre utfall. Utfallet är vad som räknas.</p>
+    <p><b>Invändningar:</b> Dygdetik: vagt. Utilitarism: kan offra enskilda, svårt att beräkna.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden är djup. Dygdetiken menar att moralens grund är aktörens karaktär; utilitarismen att den är handlingens utfall. Dygdetiken är agent-centric; utilitarismen är action-centric.</p>
+    <p><b>Avgörande fall — prioritering i sjukvård:</b> Utilitaristen kalkylerar nettonytta. Dygdetikern frågar vad en klok och god läkare skulle göra. Båda kan komma till olika svar.</p>
+    <p><b>Filosofisk kritik:</b> Dygdetiken kritiseras för att inte kunna vägleda akuta beslut. Utilitarismen kritiseras för att reducera moral till kalkyl.</p>
+    <p><b>Slutsats:</b> Dygdetik är rikare men mindre handlingsvägledande. Utilitarism är handlingsinriktad men tunnare. En rimlig position: dygdetik för karaktärsbildning, utilitarism för samhälleliga beslut.</p>`
+  },
+  "sinnelagsetik|konsekvensetik": {
+    e: `<p>Sinnelagsetik: bedömer avsikten. Konsekvensetik: bedömer utfallet.</p>
+    <p>Sinnelagsetikern: menade du väl? Konsekvensetikern: blev det bra?</p>`,
+    c: `<p><b>Utförligare:</b> Dessa är varandras motsatser i vad de bedömer. Sinnelagsetiken är intentionalistisk; konsekvensetiken är resultatorienterad.</p>
+    <p><b>Sinnelagsetikens argument:</b> Konsekvenser är osäkra — vi kan aldrig veta alla följder. Det enda vi kan kontrollera är vår avsikt.</p>
+    <p><b>Konsekvensetikens argument:</b> Vad spelar goda avsikter för roll om utfallet blir katastrofalt? Utfallet är vad som räknas.</p>
+    <p><b>Invändningar:</b> Sinnelagsetik: efterrationalisering. Konsekvensetik: kräver framtidskunskap vi inte har.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden är djup och filosofiskt principiell. Sinnelagsetikern bedömer handlingen utifrån dess inre kvalitet (avsikt). Konsekvensetikern bedömer handlingen utifrån dess yttre effekt (utfall).</p>
+    <p><b>Avgörande fall — lögn för att rädda en vän:</b> Sinnelagsetikern: rätt — avsikten var god. Konsekvensetikern: bedömer om lögnen ledde till bättre utfall.</p>
+    <p><b>Filosofisk kritik:</b> Sinnelagsetiken kan inte hantera ansvar. Konsekvensetiken kan inte hantera osäkerhet.</p>
+    <p><b>Slutsats:</b> Båda har allvarliga problem. Sinnelagsetiken är mer förlåtande men svagare på ansvarsutkrävande. Konsekvensetiken är mer krävande men kan bli rigid och svårberäknelig. En rimlig position: avsikten är viktig för moralisk bedömning, men utfall måste också vägas in.</p>`
+  },
+  "sinnelagsetik|etisk_egoism": {
+    e: `<p>Sinnelagsetik: bedömer avsikt. Egoism: bedömer egen vinning.</p>
+    <p>Båda är agent-fokuserade men egoismen är partisk för självet.</p>`,
+    c: `<p><b>Utförligare:</b> Sinnelagsetik är intentionell men inte nödvändigtvis egoistisk. Egoism är konsekventiell och partisk. Båda bedömer handlingen utifrån aktörens perspektiv.</p>
+    <p><b>Sinnelagsetikens argument:</b> Avsikten är avgörande. En god avsikt kan vara altruistisk.</p>
+    <p><b>Egoismens argument:</b> Allt vi gör motiveras ytterst av egenintresse — även goda avsikter.</p>
+    <p><b>Invändningar:</b> Sinnelagsetik: kan ursäkta egoism ("jag menade väl"). Egoism: reducerar all moral till själviskhet.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden är att sinnelagsetiken bedömer avsiktens innehåll (var den god?), medan egoismen bedömer handlingens konsekvens för aktören. En sinnelagsetiker kan vara altruist; en egoist kan inte vara det i grunden.</p>
+    <p><b>Avgörande fall:</b> En person som skänker pengar för att känna sig duktig. Sinnelagsetikern: avsikten är delvis egoistisk — handlingen är därför mindre god. Egoisten: handlingen gynnar dig själv (du mår bra), så den är korrekt.</p>
+    <p><b>Filosofisk kritik:</b> Sinnelagsetiken kan bli självbedräglig — vi kan alltid hävda god avsikt. Egoismen kan inte förklara genuin uppoffring.</p>
+    <p><b>Slutsats:</b> Sinnelagsetik och egoism är inte samma sak. Sinnelagsetiken kan vara altruistisk eller egoistisk beroende på avsikten. Egoismen är per definition självisk. Distinktionen är viktig för provet.</p>`
+  },
+  "sinnelagsetik|altruism": {
+    e: `<p>Sinnelagsetik: bedömer avsikt. Altruism: bedömer andras väl.</p>
+    <p>Båda är icke-egoistiska men fokuserar olika.</p>`,
+    c: `<p><b>Utförligare:</b> Sinnelagsetiken bedömer handlingen efter aktörens motiv. Altruismen bedömer efter dess effekt för andra.</p>
+    <p><b>Sinnelagsetikens argument:</b> Vi kan bara kontrollera våra avsikter. Att vilja andras bästa är moraliskt avgörande.</p>
+    <p><b>Altruismens argument:</b> Handlingens mål är andras väl. Utan positiva effekter för andra är handlingen värdelös.</p>
+    <p><b>Invändningar:</b> Sinnelagsetik: god avsikt utan verkan? Altruism: hur mäta andras väl?</p>`,
+    a: `<p><b>A-nivå:</b> Båda är icke-egoistiska men skiljer sig i vad de bedömer. Sinnelagsetikern fokuserar på avsikten (inre); altruisten på konsekvensen för andra (yttre).</p>
+    <p><b>Avgörande fall:</b> En person som vill hjälpa men gör situationen värre. Sinnelagsetikern: handlingen är god (avsikten var god). Altruisten: handlingen är misslyckad (andras väl förbättrades inte).</p>
+    <p><b>Filosofisk kritik:</b> Sinnelagsetik kan ursäkta inkompetens. Altruism kan ursäkta att man bryter mot egna värderingar för att uppnå andras bästa.</p>
+    <p><b>Slutsats:</b> Sinnelagsetik och altruism är besläktade men skiljer sig i vad de bedömer. Sinnelagsetik är mer förlåtande; altruismen mer krävande.</p>`
+  },
+  "sinnelagsetik|utilitarism": {
+    e: `<p>Sinnelagsetik: avsikten avgör. Utilitarism: utfallet avgör.</p>
+    <p>Sinnelagsetikern: menade du väl? Utilitaristen: blev det bästa möjliga?</p>`,
+    c: `<p><b>Utförligare:</b> Direkt motsatta positioner. Sinnelagsetiken är intentionalistisk; utilitarismen är resultatorienterad.</p>
+    <p><b>Sinnelagsetikens argument:</b> Vi kan bara kontrollera våra avsikter. Konsekvenser är osäkra.</p>
+    <p><b>Utilitarismens argument:</b> Goda avsikter är värdelösa om de leder till lidande. Utfallet räknas.</p>
+    <p><b>Invändningar:</b> Sinnelagsetik: efterrationalisering. Utilitarism: kräver framtidskunskap.</p>`,
+    a: `<p><b>A-nivå:</b> Denna jämförelse är pedagogiskt central — den visar två fundamentalt olika synsätt på moralens kärna.</p>
+    <p><b>Avgörande fall:</b> Att skänka pengar till en hjälporganisation som visar sig vara korrupt. Sinnelagsetikern: handlingen är god (avsikten var god). Utilitaristen: handlingen är fel (utfallet blev dåligt).</p>
+    <p><b>Filosofisk grund:</b> Sinnelagsetiken menar att moralen handlar om vilja. Utilitarismen menar att moralen handlar om resultat.</p>
+    <p><b>Slutsats:</b> Båda har filosofiskt starka skäl men allvarliga svagheter. Sinnelagsetiken kan bli självbedräglig; utilitarismen kan bli omänsklig. En rimlig position: avsikten är viktig för moralisk bedömning men räcker inte ensam — vi måste också bedöma utfall.</p>`
+  },
+  "konsekvensetik|etisk_egoism": {
+    e: `<p>Konsekvensetik (generell): bedömer utfall. Etisk egoism: bedömer utfall för dig själv.</p>
+    <p>Egoismen är en specifik form av konsekvensetik — partisk för självet.</p>`,
+    c: `<p><b>Utförligare:</b> Konsekvensetik är den bredare kategorin. Etisk egoism är en variant som säger att konsekvenserna ska vara bra för dig själv. Andra varianter: altruism (för andra), utilitarism (för alla lika).</p>
+    <p><b>Konsekvensetikens argument:</b> Utfallet är vad som räknas. Handlingar är medel för att uppnå gott.</p>
+    <p><b>Egoismens argument:</b> Alla handlingar motiveras ytterst av egenintresse. Att förneka detta är naivt.</p>
+    <p><b>Invändningar:</b> Konsekvensetik: svårt att beräkna alla följder. Egoism: kan inte lösa kollektiva problem.</p>`,
+    a: `<p><b>A-nivå:</b> Etisk egoism är en underkategori till konsekvensetik. Alla egoister är konsekventialister, men inte alla konsekventialister är egoister. Skillnaden ligger i VEM konsekvenserna ska gynna.</p>
+    <p><b>Avgörande fall — tiggande:</b> Konsekvensetikern i vid mening frågar vad som maximerar det goda. Egoisten frågar vad som maximerar ditt eget goda. Om du mår bra av att hjälpa är båda överens; om du inte gör det, skiljer de sig.</p>
+    <p><b>Filosofisk kritik:</b> Egoismen kan vara logiskt självmotsägande som universaliserad princip (om alla handlar egoistiskt, kollapsar samarbetet). Konsekvensetik i vid mening är mer flexibel.</p>
+    <p><b>Slutsats:</b> Egoismen är en filosofiskt svagare position än bredare konsekvensetik. Men den utmanar oss att erkänna att egenintresse ofta ligger bakom vad vi kallar moral.</p>`
+  },
+  "konsekvensetik|altruism": {
+    e: `<p>Konsekvensetik: bedömer utfall. Altruism: bedömer utfall för andra.</p>
+    <p>Altruismen är en specifik form av konsekvensetik — inriktad på andras väl.</p>`,
+    c: `<p><b>Utförligare:</b> Båda bedömer handlingar efter utfall, men altruismen fokuserar på andras väl. Utilitarism är en form av altruistisk konsekvensetik (maximera sammanlagd lycka).</p>
+    <p><b>Konsekvensetikens argument:</b> Bara utfall räknas.</p>
+    <p><b>Altruismens argument:</b> Andras väl är moralens mål. Empati är motorn.</p>
+    <p><b>Invändningar:</b> Konsekvensetik: svårt att beräkna. Altruism: riskerar att bli utnyttjad.</p>`,
+    a: `<p><b>A-nivå:</b> Altruism är en form av konsekvensetik — den bedömer handlingar efter deras utfall för andra. Men den skiljer sig från utilitarismen genom att inte kräva maximering.</p>
+    <p><b>Avgörande fall:</b> En person kan vara altruistisk utan att maximera nyttan — hen kan bara vilja hjälpa utan att räkna. Utilitaristen kräver däremot en kalkyl.</p>
+    <p><b>Filosofisk kritik:</b> Altruism utan kalkyl kan bli naiv (hjälp som skadar på sikt). Konsekvensetik utan altruism kan bli kall (kalkyl utan empati).</p>
+    <p><b>Slutsats:</b> Altruism är moraliskt rikare men mindre systematisk. Konsekvensetik i vid mening ger struktur; altruismen ger motivation. Utilitarismen kombinerar båda: altruistisk inriktning + systematisk kalkyl.</p>`
+  },
+  "konsekvensetik|utilitarism": {
+    e: `<p>Konsekvensetik (generell): bedömer utfall. Utilitarism: bedömer utfall i termer av lycka.</p>
+    <p>Utilitarismen är den vanligaste formen av konsekvensetik.</p>`,
+    c: `<p><b>Utförligare:</b> Utilitarismen är en specifik form av konsekvensetik som säger att det goda = sammanlagd lycka. Andra former av konsekvensetik kan ha andra mått (t.ex. kunskap, dygd).</p>
+    <p><b>Konsekvensetikens argument:</b> Utfallet räknas.</p>
+    <p><b>Utilitarismens argument:</b> Utfallet ska mätas i lycka och lidande — det som har finalt värde.</p>
+    <p><b>Invändningar:</b> Konsekvensetik: svårt att beräkna. Utilitarism: kan offra individer, svårt att jämföra olika sorters lycka.</p>`,
+    a: `<p><b>A-nivå:</b> Utilitarism är den dominerande formen av konsekvensetik. Skillnaden ligger i hur det goda definieras. Konsekvensetik i vid mening kan ha olika mått (dygd, kunskap, skönhet). Utilitarismen väljer lycka.</p>
+    <p><b>Avgörande fall:</b> En handling som maximerar kunskap men minskar lycka. Konsekvensetikern kan acceptera den (om kunskap är målet). Utilitaristen förkastar den (lycka är målet).</p>
+    <p><b>Filosofisk kritik:</b> Utilitarismens val av lycka som enda mått kritiseras av pluralister (flera finala värden). Men utilitarismens enkelhet är också dess styrka.</p>
+    <p><b>Slutsats:</b> Utilitarism är den bäst definierade formen av konsekvensetik. Men konsekvensetik i vid mening är bredare — och mer flexibel. Välj rätt verktyg efter frågan.</p>`
+  },
+  "etisk_egoism|altruism": {
+    e: `<p>Båda är konsekvensetiska. Skillnaden: VEM konsekvenserna ska gynna (jag vs andra).</p>
+    <p>Egoisten: hjälper bara om hen själv mår bra. Altruisten: hjälper för att andra ska få det bättre.</p>`,
+    c: `<p><b>Utförligare:</b> Egoismen bygger på antagandet att människor söker sitt eget bästa. Altruismen förnekar detta — vi kan vara genuint osjälviska.</p>
+    <p><b>Egoismens argument:</b> Vi kan aldrig göra något vi inte vill. Även uppoffringar görs för att undvika skuldkänslor.</p>
+    <p><b>Altruismens argument:</b> Empati är verklig. Darwinistiskt argument: samarbete ligger i vår natur.</p>
+    <p><b>Invändningar:</b> Egoismen: kan inte lösa kollektiva problem. Altruismen: riskerar att bli utnyttjad.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden handlar om vad som motiverar moraliskt handlande. Är människan i grunden egoistisk eller altruistisk?</p>
+    <p><b>Psykologisk vs etisk egoism:</b> Man måste skilja på (1) psykologisk egoism — ett deskriptivt påstående om att människor FAKTISKT handlar egoistiskt; och (2) etisk egoism — ett normativt påstående om att människor BÖR göra det. Humes lag: man kan inte härleda ett "bör" från ett "är".</p>
+    <p><b>Etisk egoism som teori:</b> Upplyst egoist inser att långsiktigt egenintresse sammanfaller med att hjälpa andra. Detta leder i praktiken till samma beteende som altruismen förespråkar.</p>
+    <p><b>Altruismens styrka:</b> Fångar föräldrars uppoffringar för barn — svårt att förklara egoistiskt utan urvattning.</p>
+    <p><b>Slutsats:</b> Båda teorierna har svagheter. En rimlig position är ömsesidig altruism: vi hjälper andra för att vi vill det, och ett samhälle av ömsesidig hjälp gynnar alla.</p>`
+  },
+  "etisk_egoism|utilitarism": {
+    e: `<p>Båda är konsekvensetiska. Skillnaden: egoism gynnar jag själv; utilitarism gynnar alla lika.</p>
+    <p>Egoisten maximerar egen nytta; utilitaristen sammanlagd nytta.</p>`,
+    c: `<p><b>Utförligare:</b> Direkt motsatta positioner inom konsekvensetiken. Egoismen är partisk för självet; utilitarismen är opartisk (allas lycka räknas lika).</p>
+    <p><b>Egoismens argument:</b> Alla handlingar motiveras ytterst av egenintresse.</p>
+    <p><b>Utilitarismens argument:</b> Allas lycka har samma värde. En handling är rätt om den maximerar den sammanlagda lyckan.</p>
+    <p><b>Invändningar:</b> Egoism: kan inte lösa kollektiva problem. Utilitarism: kan offra enskilda individer.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden är filosofiskt djup. Båda är konsekventialister, men utilitarismen kräver ett opartiskt perspektiv medan egoismen är partisk.</p>
+    <p><b>Avgörande fall — tiggande:</b> Egoisten: hjälper bara om hen själv gynnas. Utilitaristen: hjälper om det maximerar sammanlagd lycka — vilket det oftast gör. I praktiken sammanfaller valen ofta, men motiveringarna skiljer sig.</p>
+    <p><b>Filosofisk kritik:</b> Egoismen är logiskt oförenlig med universalisering. Utilitarismen kan reducera enskilda till medel.</p>
+    <p><b>Slutsats:</b> Utilitarism är den bredare och mer opartiska positionen. Egoismen är en provokation som utmanar oss att erkänna egenintressets roll. Men utilitarismen ger bättre ramverk för samhälleliga beslut.</p>`
+  },
+  "altruism|utilitarism": {
+    e: `<p>Båda är konsekvensetiska och icke-egoistiska. Altruism: andras väl. Utilitarism: maximerad sammanlagd lycka.</p>
+    <p>Utilitarismen är en specifik form av altruism — den mest systematiska.</p>`,
+    c: `<p><b>Utförligare:</b> Altruism är bredare (handla för andras bästa). Utilitarism är specifikare (maximera sammanlagd lycka). Alla utilitarister är altruister, men inte alla altruister är utilitarister.</p>
+    <p><b>Altruismens argument:</b> Empati och omsorg om andra. Vi blir lyckliga av andras lycka.</p>
+    <p><b>Utilitarismens argument:</b> Den moraliska kalkylen måste vara systematisk. Vi behöver ett mått (lycka) att maximera.</p>
+    <p><b>Invändningar:</b> Altruism: vagt, ingen kalkyl. Utilitarism: kan offra individer, svårt att mäta lycka.</p>`,
+    a: `<p><b>A-nivå:</b> Altruism är en bredare kategori än utilitarism. En altruist kan handla på känsla utan kalkyl; en utilitarist måste räkna. Men båda delar den grundläggande idén att moral handlar om andras väl, inte bara om jag själv.</p>
+    <p><b>Avgörande fall:</b> Att skänka pengar till välgörenhet utan att veta vilken organisation som är effektivast. Altruisten: handlingen är god (goda avsikter, andras väl främjas). Utilitaristen: handlingen är slösad om pengarna används fel — du borde ha kalkylerat.</p>
+    <p><b>Filosofisk kritik:</b> Altruism utan systematik är ineffektiv. Utilitarism utan empati är kall och kan bli omänsklig.</p>
+    <p><b>Slutsats:</b> Utilitarism är altruismens systematiska form. Altruism ger motivation; utilitarism ger struktur. En rimlig position: empati som grund, kalkyl som verktyg.</p>`
+  },
+
+  /* ============ GRUPP 2: Livsstrategier ============ */
+
+  "hedonism|stoicism": {
+    e: `<p>Hedonismen söker lust och undviker smärta. Stoicismen söker sinnesro genom att acceptera det man inte kan påverka.</p>
+    <p>Vid motgång: hedonisten söker nya lustkällor. Stoikern accepterar händelsen och fokuserar på sina reaktioner.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är livsstrategier — svar på frågan "hur bör jag leva mitt liv?". Men de skiljer sig fundamentalt i vad de anser vara källan till ett gott liv.</p>
+    <p><b>Hedonismens argument:</b> Alla varelser söker naturligt lust. Mill: kvalitativ lust (bildning) är högre.</p>
+    <p><b>Stoicismens argument:</b> Yttre ting står inte under vår kontroll. Endast våra reaktioner.</p>
+    <p><b>Svagheter:</b> Hedonism: habituering underminerar bestående lycka. Stoicism: risk för passivitet.</p>`,
+    a: `<p><b>A-nivå:</b> Båda söker det goda livet men definierar det olika: hedonismen som maximal lust, stoicismen som inre harmoni oberoende av yttre omständigheter.</p>
+    <p><b>Njutningsmaskinen:</b> Skulle du koppla in dig? Hedonisten måste svara ja. Stoikern nej — sinnesro är inte lust, och verkligheten kräver förnuft. Att många tvekar visar att vi värderar verklighet, autenticitet och mening högre än blott lust.</p>
+    <p><b>Motargument mot stoicismen:</b> Är stoikern lycklig eller avtrubbad? Stoikern svarar: apati är inte likgiltighet utan frihet från destruktiva känslor.</p>
+    <p><b>Slutsats:</b> Stoicismen ger ett mer hållbart svar på motgångar. Hedonismen fångar glädjen men har svårt med mening. En rimlig hybrid: acceptera det du inte kan styra (stoicism), sök positiva upplevelser där du kan (hedonism).</p>`
+  },
+  "hedonism|existentialism": {
+    e: `<p>Hedonismen söker lust som högsta värde. Existentialismen menar att vi skapar vår egen mening genom val.</p>
+    <p>Hedonisten: undvik smärta. Existentialisten: möt ångesten och välj autentiskt.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är livsstrategier, men de skiljer sig i vad de ser som livets mål. Hedonismen: njutning. Existentialismen: autentiskt skapande av mening.</p>
+    <p><b>Hedonismens argument:</b> Lust är det enda som har finalt värde. Allt annat är medel.</p>
+    <p><b>Existentialismens argument:</b> Livet har ingen förutbestämd mening. Vi skapar mening genom våra val. Lust är inte målet — autenticitet är.</p>
+    <p><b>Invändningar:</b> Hedonism: habituering, tomhet. Existentialism: skuldbelägger, ignorerar strukturella hinder.</p>`,
+    a: `<p><b>A-nivå:</b> Båda är livsstrategier men besvarar olika frågor. Hedonismen: hur maximerar jag njutning? Existentialismen: hur lever jag autentiskt?</p>
+    <p><b>Avgörande fall — njutningsmaskinen:</b> Hedonisten måste svara ja (maximal lust). Existentialisten säger nej — att koppla in sig är att fly sitt ansvar (dålig tro). Detta visar att existentialisten värderar frihet och autenticitet över lust.</p>
+    <p><b>Filosofisk kritik:</b> Hedonismen kan leda till tomhet och habituation. Existentialismen kan leda till ångest och överansvar.</p>
+    <p><b>Slutsats:</b> Hedonism är enklare men ytligare. Existentialism är djupare men mer krävande. En rimlig position: njutning är viktig men meningsfullhet och autenticitet är viktigare — existentialismen fångar detta bättre.</p>`
+  },
+  "hedonism|nihilism": {
+    e: `<p>Hedonismen söker lust som högsta värde. Nihilismen menar att inget har värde.</p>
+    <p>Hedonisten: njut. Nihilisten: inget spelar roll.</p>`,
+    c: `<p><b>Utförligare:</b> Direkt motsatta positioner. Hedonismen menar att lust är finalt värdefullt. Nihilismen förnekar att något är värdefullt.</p>
+    <p><b>Hedonismens argument:</b> Lust är det enda vi direkt erfar som gott.</p>
+    <p><b>Nihilismens argument:</b> Värden är konstruerade. Det finns ingen objektiv grund för lustens värde.</p>
+    <p><b>Invändningar:</b> Hedonism: habituering, tomhet. Nihilism: handlingsförlamning, självmotsägelse.</p>`,
+    a: `<p><b>A-nivå:</b> Hedonism och nihilism är varandras motsatser. Hedonismen säger att lust är det enda finala värdet; nihilismen säger att inget har värde.</p>
+    <p><b>Avgörande fall:</b> Båda kan beskriva samma livsstil — njutningsjakt — men av olika skäl. Hedonisten njuter för att lust är gott. Nihilisten kan njuta för att inget annat spelar roll.</p>
+    <p><b>Filosofisk kritik:</b> Hedonismen antar att lust har värde. Nihilisten invänder att detta är en konstruktion. Hedonisten svarar att lust är direkt erfaren — nihilisten kan inte förneka att vi upplever njutning.</p>
+    <p><b>Slutsats:</b> Hedonism är filosofiskt mer konstruktiv än nihilismen — den ger en vägledning. Nihilismen förnekar alla vägledningar, vilket gör den praktiskt oanvändbar. Men nihilismen utmanar hedonismen att förklara varför lust har värde.</p>`
+  },
+  "stoicism|existentialism": {
+    e: `<p>Stoicismen: acceptera ödet. Existentialismen: förneka ödet och välj fritt.</p>
+    <p>Båda betonar den inre hållningen men skiljer sig om frihetens omfattning.</p>`,
+    c: `<p><b>Utförligare:</b> Båda är livsstrategier som betonar inre inställning, men de skiljer sig fundamentalt i synen på frihet. Stoikern: yttre händelser är ödesbestämda. Existentialisten: människan är radikalt fri.</p>
+    <p><b>Stoicismens argument:</b> Det vi kan kontrollera är våra reaktioner — inte händelserna. Sinnesro kräver acceptans.</p>
+    <p><b>Existentialismens argument:</b> Vi är dömda till frihet. Att skylla på ödet är dålig tro. Vi skapar oss genom val.</p>
+    <p><b>Invändningar:</b> Stoicism: fatalism/passivitet. Existentialism: skuldbeläggning, ignorera strukturella hinder.</p>`,
+    a: `<p><b>A-nivå:</b> Skillnaden handlar om frihetens omfattning. Stoikern menar att yttre händelser är ödesbestämda — vi kan bara styra våra reaktioner. Existentialisten menar att vi är radikalt fria — även våra reaktioner är val.</p>
+    <p><b>Avgörande fall — att födas fattig:</b> Stoikern: acceptera din situation och fokusera på ditt förhållningssätt. Existentialisten: du är fri att välja hur du förhåller dig — och du bär ansvaret för vad du gör med ditt öde.</p>
+    <p><b>Filosofisk kritik:</b> Stoicism riskerar att ursäkta orättvisor (allt är ödet). Existentialism riskerar att skuldbelägga individer (du är ansvarig för allt).</p>
+    <p><b>Slutsats:</b> Stoicism och existentialism kan komplettera varandra: stoicism för acceptans av det oföränderliga, existentialism för ansvar för det föränderliga. Men i sin rena form är de oförenliga.</p>`
+  },
+  "stoicism|nihilism": {
+    e: `<p>Stoicismen: lev i enlighet med förnuftet och naturen. Nihilismen: inget har värde.</p>
+    <p>Stoikern: acceptera ödet. Nihilisten: förneka mening.</p>`,
+    c: `<p><b>Utförligare:</b> Direkt motsatta positioner. Stoicismen menar att det finns naturlagar och förnuft som styr livet. Nihilismen förnekar alla objektiva grunder.</p>
+    <p><b>Stoicismens argument:</b> Naturen har en rationell struktur. Att leva i enlighet med förnuftet är det goda livet.</p>
+    <p><b>Nihilismens argument:</b> Inga objektiva värden finns. Allt är konstruktion.</p>
+    <p><b>Invändningar:</b> Stoicism: förutsätter att naturen har mening — vilket nihilisten förnekar. Nihilism: handlingsförlamning.</p>`,
+    a: `<p><b>A-nivå:</b> Stoicismen är en metafysiskt rik position — den förutsätter att naturen har en rationell struktur som vi bör följa. Nihilismen förnekar alla sådana strukturer.</p>
+    <p><b>Avgörande fråga:</b> Finns det en naturlig ordning att leva i enlighet med? Stoikern: ja. Nihilisten: nej — naturen är likgiltig.</p>
+    <p><b>Filosofisk kritik:</b> Stoicismen kan vara en projektion av mänskligt förnuft på naturen. Nihilismen kan vara självmotsägande (vilket vi diskuterat).</p>
+    <p><b>Slutsats:</b> Stoicism är en positiv och handlingsorienterad filosofi som förutsätter en viss metafysik. Nihilismen är deskriptiv och handlingsförlamande. Men nihilisten kan invända att stoikern projicerar mening på en meningslös värld. Frågan förblir öppen.</p>`
+  },
+  "existentialism|nihilism": {
+    e: `<p>Båda förnekar objektiv mening. Skillnaden: nihilisten stannar där; existentialisten säger att vi måste skapa mening genom val.</p>`,
+    c: `<p><b>Utförligare:</b> Båda delar premissen att ingen objektiv mening finns (ingen Gud, inget öde). Men de drar olika slutsatser.</p>
+    <p><b>Nihilismens slutsats:</b> Ingen mening finns — vi bör inte försöka skapa mening, det är illusion.</p>
+    <p><b>Existentialismens slutsats:</b> Vi MÅSTE skapa mening. Sartre: existensen föregår essensen.</p>
+    <p><b>Problem:</b> Nihilismen leder till handlingsförlamning; är den självmotsägande? Existentialismen skuldbelägger och bortser från strukturella hinder.</p>`,
+    a: `<p><b>A-nivå:</b> Samma premiss kan leda till motsatta slutsatser. Nihilisten: inget spelar roll. Existentialisten: allt spelar roll, eftersom vi skapar mening.</p>
+    <p><b>Självmotsägelsekritiken:</b> Nihilisten säger "det finns inga värden", men tycks mena att sanningen har värde. Försvar: Humes lag — faktapåstående vs värdepåstående. Men Humes lag är omdiskuterad.</p>
+    <p><b>Existentialismens styrka:</b> Aktiv livshållning. Sartre: en fånge är friare än sin fångvaktare, för fången kan välja sitt förhållningssätt.</p>
+    <p><b>Svaghet:</b> Skuldbeläggande — bortser från strukturella orättvisor.</p>
+    <p><b>Slutsats:</b> Existentialismen är ett starkare svar — den ger mening utan att förneka avsaknaden av objektiv mening. Nihilismen är filosofiskt intressant men praktiskt oanvändbar.</p>`
+  }
+};
+
+/* ============================================================
+   ETIK-LAB
+   ============================================================ */
+const CASES = {
+  tiggande: {
+    title: "Det tiggande fallet",
+    scenario: "Du har pengar för antingen snacks till vännerna eller mat till en nödställd kvinna och hennes barn.",
+    choices: [
+      { label: "Köp mat till kvinnan och barnen", key: "hjalp" },
+      { label: "Köp snacks till vännerna", key: "fredagsmys" }
+    ],
+    feedback: {
+      hjalp: {
+        utilitarism: "Mill: Lidandeminskningen för barnen är enorm jämfört med fredagsmysets marginalnytta.",
+        pliktetik: "Kant: Du uppfyller den imperfekta plikten att bistå nödställda och behandlar kvinnan som mål i sig.",
+        sinnelagsetik: "Sinnelagsetikern: Om avsikten är god är handlingen rätt.",
+        dygdetik: "Aristoteles: Generositet är en dygd. En god människa hjälper.",
+        etisk_egoism: "Egoisten: Hjälper bara om du själv mår bra. Om du får dåligt samvete av att inte hjälpa, är det rationellt att hjälpa."
+      },
+      fredagsmys: {
+        utilitarism: "Mill: Endast om fredagsmyset ger större sammanlagd lycka (osannolikt).",
+        pliktetik: "Kant: Du kan inte vilja en maxim att aldrig hjälpa nödställda.",
+        sinnelagsetik: "Sinnelagsetikern: Om du inte insåg nöden kan handlingen vara rätt. Om du medvetet valde bort henne, var avsikten inte god.",
+        dygdetik: "Aristoteles: En dygdig person känner medkänsla. Att ignorera nöden är inte en dygd.",
+        etisk_egoism: "Egoisten: Om du värderar vänskapen högre, är valet rationellt egoistiskt."
+      }
+    }
+  },
+  tortyr: {
+    title: "Tortyrdilemmat",
+    scenario: "En terrorist har placerat en bomb som kan döda en miljon. Myndigheterna överväger tortyr för att få fram bombens position.",
+    choices: [
+      { label: "Tillåt tortyr", key: "tillat" },
+      { label: "Förbjud tortyr", key: "forbjud" }
+    ],
+    feedback: {
+      tillat: {
+        utilitarism: "Handlingsutilitaristen: Nettonyttan är enormt positiv. Regelutilitaristen mer tveksam — tortyr undergräver rättsstaten.",
+        pliktetik: "Klassisk Kant: Absolut förbud. Tortyr behandlar människan enbart som medel.",
+        sinnelagsetik: "Sinnelagsetikern: Om avsikten är att rädda en miljon är handlingen rätt — men tortyrmästaren bär den moraliska bördan.",
+        dygdetik: "Dygdetikern: En genuin tragedi. Att tortera förstör karaktären; att inte rädda är feghet."
+      },
+      forbjud: {
+        utilitarism: "Handlingsutilitaristen: Fel — om tortyr räddar en miljon är det obligatoriskt.",
+        pliktetik: "Kant: Rätt. Tortyr kränker människan som mål i sig.",
+        sinnelagsetik: "Sinnelagsetikern: Om avsikten är att respektera människovärdet är handlingen god.",
+        dygdetik: "Dygdetikern: En god människa respekterar människovärdet, men vill också rädda liv. Konflikten är genuin."
+      }
+    }
+  }
+};
+
+/* ============================================================
+   FLASHCARDS — två lägen
+   ============================================================ */
+const CONCEPT_KEYS = Object.keys(CONCEPTS);
+const FLASHCARDS_CONCEPTS = CONCEPT_KEYS.map(key => {
+  const c = CONCEPTS[key];
+  return { tag: c.cat, q: `Vad innebär "${c.term}"?`, a: c.l2 };
+});
+
+const FLASHCARDS_EXTRA = [
+  { tag: "Värdeteori", q: "Vad är skillnaden mellan finalt och instrumentellt värde?", a: "Finalt: värdefullt i sig (lycka). Instrumentellt: medel för något annat (pengar)." },
+  { tag: "Konsekvensetik", q: "Vad kännetecknar en konsekvensetisk teori?", a: "Handlingens moraliska värde avgörs helt av dess konsekvenser." },
+  { tag: "Kant", q: "Vilka är Kants två formuleringar av det kategoriska imperativet?", a: "(1) Handla så att din maxim kan bli allmän lag. (2) Behandla aldrig en människa enbart som medel utan som mål i sig." },
+  { tag: "Mill", q: "Varför kritiserade Kant Gyllene regeln?", a: "Den bygger på subjektiva önskningar — en masochist vill bli plågad och skulle plåga andra." },
+  { tag: "Aristoteles", q: "Vad är en dygd enligt Aristoteles?", a: "En förnuftig medelväg mellan två ytterligheter. Mod mellan feghet och våghalsighet." },
+  { tag: "Mill vs Bentham", q: "Vad är skillnaden mellan Benthams och Mills utilitarism?", a: "Bentham: kvantitativ lust (all lust räknas lika). Mill: kvalitativ (intellektuell lust är högre än kroppslig)." },
+  { tag: "Stoicism", q: "Vad är apati inom stoicismen?", a: "Frånvaro av destruktiva känslor (rädsla, ilska, avund) — inte likgiltighet." },
+  { tag: "Existentialism", q: "Vad är 'dålig tro' (mauvaise foi) hos Sartre?", a: "Att förneka sin frihet genom att skylla på ödet, samhället eller genetiken." },
+  { tag: "Nihilism", q: "Vad är Humes lag och varför är den viktig för nihilismen?", a: "Man kan inte härleda 'bör' från 'är'. Nihilisten använder den för att skilja faktapåståenden från värdepåståenden." },
+  { tag: "Rawls", q: "Vad är Rawls differensprincip?", a: "Ojämlikheter är tillåtna bara om de gynnar de sämst ställda i samhället." },
+  { tag: "Samhällsfilosofi", q: "Skillnad mellan stat och nation?", a: "Stat: geografiskt område med rättsordning. Nation: kulturell och identitetsmässig gemenskap oberoende av gränser." },
+  { tag: "Rättigheter", q: "Skillnad mellan positiva och negativa rättigheter?", a: "Positiva: rätt till resurser (vård, utbildning). Negativa: frihet från ingrepp (yttrandefrihet, äganderätt)." },
+  { tag: "Nozick", q: "Varför avvisar Nozick positiva rättigheter?", a: "De kräver tvångsbeskattning, vilket han liknar vid tvångsarbete och ser som intrång i äganderätten." },
+  { tag: "Stoicism", q: "Vad är stoikernas bidrag till idén om mänskliga rättigheter?", a: "Alla människor är lika inför ödet och äger förnuft — därför samma rättigheter (naturrätt)." },
+  { tag: "Sinnelagsetik", q: "Vad är verifierbarhetsproblemet för sinnelagsetiken?", a: "Hur vet vi att någon verkligen menade väl? Efterrationalisering är en risk." },
+  { tag: "Dygdetik", q: "Varför kritiseras dygdetiken för vaghet?", a: "Den ger inga konkreta handlingsregler vid etiska dilemman." },
+  { tag: "Eudaimonism", q: "Vad är skillnaden mellan eudaimonia och lust?", a: "Eudaimonia: objektivt tillstånd av blomstrande. Lust: subjektiv känsla. Man kan ha lust utan eudaimonia (njutningsmaskinen)." },
+  { tag: "Regeletik", q: "Vad är skillnaden mellan regeletik och pliktetik?", a: "Regeletik är bredare — moralen består av regler. Pliktetik är en specifik regeletik där plikterna härleds från förnuftet (Kant)." },
+  { tag: "Konsekvensetik", q: "Vad är skillnaden mellan konsekvensetik i allmänhet och utilitarism?", a: "Konsekvensetik bedömer utfall generellt. Utilitarism specificerar att det goda = sammanlagd lycka." }
+];
+
+/* ============================================================
+   PROVTRÄNING
+   ============================================================ */
+const PROV_SCENARIOS = [
+  { id: "tiggare", text: "Du har precis pengar för antingen snacks till dina vänner eller mat till en nödställd kvinna och hennes barn." },
+  { id: "ljuga", text: "Din bästa vän har gjort något pinsamt och ber dig ljuga för att skydda hen." },
+  { id: "tortyr", text: "En terrorist har placerat en bomb som kan döda en miljon människor. Myndigheterna överväger tortyr för att få fram bombens position." },
+  { id: "stjala", text: "Ditt barn är svårt sjukt och du har inte råd med medicinen. Du överväger att stjäla den från apoteket." },
+  { id: "skatt", text: "Regeringen föreslår höjd skatt för att finansiera gratis sjukvård för alla." },
+  { id: "mobbning", text: "Du ser en klasskamrat bli mobbad men är rädd att ingripa ifall du själv blir ett offer." }
+];
+
+const PROV_MODEL_ANSWERS = {
+  regeletik: { e: "Regeletikern följer fasta regler (t.ex. 'tala sanning', 'döda inte').", c: "Regeletik är bredare än pliktetik. Regler motiveras religiöst, förnuftsmässigt, samhällsnyttigt eller yrkesmässigt.", a: "A-nivå: Regeletiken ger förutsägbarhet men saknar vägledning vid regelkonflikter. Vad gör du när plikten att tala sanning krockar med plikten att rädda liv? Regeletiken är en familj av teorier med olika svar." },
+  pliktetik: { e: "Kantianen frågar om handlingens maxim kan universaliseras utan motsägelse, och om handlingen behandlar någon enbart som medel.", c: "Kants kategoriska imperativ har två formuleringar: (1) universaliseringstest, (2) människan som mål i sig. Perfekta plikter är absoluta; imperfekta ger utrymme för omdöme.", a: "A-nivå: Kant ger starkt skydd för individens värdighet. Moderna kantianer (Nagel) erkänner moraliska trösklar: vid extrema katastrofer kan absoluta plikter brytas, men som tragisk nödsituation, inte vanlig kalkyl." },
+  dygdetik: { e: "Dygdetikern frågar hur en god, praktiskt klok människa skulle handla.", c: "Aristoteles: dygden är medelvägen mellan två ytterligheter. Moralen odlas genom praktisk träning.", a: "A-nivå: Dygdetiken ger en bild av moralisk mognad som handlingsetiken saknar, men är vag vid konkreta dilemman. Dygdetik kompletterar handlingsetiken." },
+  sinnelagsetik: { e: "Sinnelagsetikern bedömer handlingen efter aktörens avsikt, inte resultatet.", c: "Om avsikten var god är handlingen rätt, även om konsekvenserna blev dåliga. Verifierbarhetsproblemet: internalism, externalism eller pragmatism.", a: "A-nivå: Sinnelagsetiken har ett problem med efterrationalisering, men detta kan vara en epistemisk begränsning snarare än ett teoretiskt fel. Användbar för självrannsakan men otillräcklig för samhällelig rättvisa." },
+  konsekvensetik: { e: "Konsekvensetikern bedömer handlingen efter dess utfall.", c: "Konsekvensetik är den bredare kategorin. Varianter: egoism (jag), altruism (andra), utilitarism (alla lika).", a: "A-nivå: Konsekvensetiken ger ett handlingsinriktat ramverk men riskerar att reducera moral till kalkyl. Frågan om vad som är 'gott utfall' är filosofiskt omdiskuterad." },
+  etisk_egoism: { e: "Egoisten handlar så att konsekvenserna blir bäst för hen själv.", c: "Etisk egoism bygger på antagandet att människor söker sitt eget bästa. Upplyst egoism: långsiktigt egenintresse sammanfaller med samarbete.", a: "A-nivå: Skilj psykologisk egoism (deskriptivt) från etisk egoism (normativt). Humes lag: kan inte härleda 'bör' från 'är'. En rimlig position är ömsesidig altruism snarare än ren egoism." },
+  altruism: { e: "Altruisten handlar för andras bästa, utan tanke på egen vinning.", c: "Altruism stöds filosofiskt (empati) och biologiskt (samarbete ligger i vår natur).", a: "A-nivå: Altruismen fångar genuin osjälviskhet, men riskerar att bli naiv och utnyttjad. En rimlig position är ömsesidig altruism." },
+  utilitarism: { e: "Utilitaristen beräknar nettonyttan av varje handlingsalternativ och väljer det som maximerar sammanlagd lycka.", c: "Handlingsutilitaristen kalkylerar i stunden. Regelutilitaristen frågar vilken regel som över tid maximerar lyckan.", a: "A-nivå: Utilitarismen kräver en kalkyl som är praktiskt svår — vi kan aldrig veta alla konsekvenser i förväg. Handlingsutilitaristen tillåter i teorin rättighetskränkningar. En nyanserad slutsats erkänner att utilitarismen ger ett användbart ramverk men riskerar att offra enskilda individer." },
+  hedonism: { e: "Hedonisten söker lust och undviker smärta.", c: "Hedonism är en livsstrategi. Mill skiljer kvalitativ och kvantitativ lust.", a: "A-nivå: Habitueringseffekten är hedonismens allvarligaste problem. Njutningsmaskinen avslöjar att vi värderar verklighet högre än blott lust." },
+  stoicism: { e: "Stoikern accepterar det hen inte kan påverka.", c: "Yttre händelser styrs av ödet. Endast våra reaktioner står under vår kontroll. Stoikerna formulerade naturrätten.", a: "A-nivå: Stoicismen ger verktyg för att hantera motgångar (likheter med KBT). Kritik: passivitet inför orättvisor. Stoikern svarar: ansvar att göra det goda av sitt öde." },
+  existentialism: { e: "Existentialisten menar att vi är fria att skapa oss själva genom våra val.", c: "Sartre: existensen föregår essensen. Vi föds utan förutbestämd mening. Existentiell ångest är en påminnelse om vårt ansvar.", a: "A-nivå: Existentialismen ger en aktiv livshållning, men kritiker menar att den bortser från strukturella hinder. Existentialisten svarar: friheten gäller förhållningssättet, inte magiska möjligheter." },
+  nihilism: { e: "Nihilisten menar att inget har objektiv mening — varken kunskap, moral eller värden.", c: "Nihilism är deskriptiv, inte preskriptiv. Värden är konstruerade av historia och kultur.", a: "A-nivå: Självmotsägelsekritiken — om nihilisten säger 'det finns inga värden', tycks hen mena att sanningen har värde. Försvar via Humes lag. Men Humes lag är omdiskuterad." }
+};
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+$$('nav.main-nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.view;
+    $$('nav.main-nav button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    $$('.view').forEach(v => v.classList.remove('active'));
+    $('#view-' + target).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+function renderBeg(filter) {
+  const grid = $('#begGrid');
+  grid.innerHTML = '';
+  const f = (filter || '').toLowerCase().trim();
+  const list = Object.entries(CONCEPTS).filter(([k, c]) => {
+    if (!f) return true;
+    return c.term.toLowerCase().includes(f) || c.cat.toLowerCase().includes(f) || c.l2.toLowerCase().includes(f);
+  });
+  if (!list.length) { grid.innerHTML = '<div class="placeholder">Inga begrepp matchar sökningen.</div>'; return; }
+  list.forEach(([key, c]) => {
+    const btn = document.createElement('button');
+    btn.className = 'concept-item'; btn.type = 'button';
+    btn.setAttribute('aria-label', 'Öppna begrepp: ' + c.term);
+    btn.innerHTML = `<span class="term">${c.term}</span><span class="category">${c.cat}</span>`;
+    btn.addEventListener('click', () => openConcept(key));
+    grid.appendChild(btn);
+  });
+}
+$('#searchBeg').addEventListener('input', e => renderBeg(e.target.value));
+
+function openConcept(key) {
+  const c = CONCEPTS[key];
+  if (!c) return;
+  $('#modalTitle').innerHTML = `<h2 style="margin:0 0 0.5rem; padding-right:2rem;">${c.term}</h2><div style="color:var(--text-secondary); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">${c.cat}</div>`;
+  $('#modalBody').innerHTML = `
+    <div class="level-box lvl-1"><b>Nivå 1 — Intuition</b>${c.l1}</div>
+    <div class="level-box lvl-2"><b>Nivå 2 — Förståelse</b>${c.l2}</div>
+    <div class="level-box lvl-3"><b>Nivå 3 — Analys</b>${c.l3}</div>
+    <div class="level-box lvl-4"><b>Nivå 4 — A-resonemang</b>${c.l4}</div>`;
+  $('#modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('#modalClose').focus();
+}
+function closeModal() {
+  $('#modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('.tlink');
+  if (el && el.dataset.term && CONCEPTS[el.dataset.term]) openConcept(el.dataset.term);
+});
+$('#modalClose').addEventListener('click', closeModal);
+$('#modal').addEventListener('click', e => { if (e.target === $('#modal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#modal').classList.contains('open')) closeModal(); });
+
+const selA = $('#selA'), selB = $('#selB');
+THEORIES_LIST.forEach(t => {
+  selA.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+  selB.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+});
+selA.value = 'utilitarism';
+selB.value = 'pliktetik';
+
+function getComp(a, b) {
+  if (COMPARISONS[`${a}|${b}`]) return { cmp: COMPARISONS[`${a}|${b}`], swap: false };
+  if (COMPARISONS[`${b}|${a}`]) return { cmp: COMPARISONS[`${b}|${a}`], swap: true };
+  return null;
+}
+
+function renderComparison() {
+  const a = selA.value, b = selB.value;
+  const out = $('#cmpOutput');
+  if (a === b) { out.innerHTML = '<div class="placeholder">Välj två olika teorier.</div>'; return; }
+  const found = getComp(a, b);
+  const A = THEORY_SUMMARY[a], B = THEORY_SUMMARY[b];
+  if (found) {
+    const [tA, tB] = found.swap ? [B, A] : [A, B];
+    out.innerHTML = `
+      <h2 style="margin-top:0;">${tA.name} vs ${tB.name}</h2>
+      <div class="cmp-section">
+        <h4><span class="level-badge e">E-nivå</span> Grundläggande jämförelse</h4>
+        ${found.cmp.e}
+      </div>
+      <div class="cmp-section">
+        <h4><span class="level-badge c">C-nivå</span> Utförligare analys</h4>
+        ${found.cmp.c}
+      </div>
+      <div class="cmp-section">
+        <h4><span class="level-badge a">A-nivå</span> Utmärkt resonemang — redo för provet</h4>
+        ${found.cmp.a}
+      </div>`;
+  } else {
+    out.innerHTML = `
+      <h2 style="margin-top:0;">${A.name} vs ${B.name}</h2>
+      <div class="cmp-section">
+        <h4><span class="level-badge e">E-nivå</span> Grundläggande jämförelse</h4>
+        <p><b>${A.name}:</b> ${A.gr}</p>
+        <p><b>${B.name}:</b> ${B.gr}</p>
+        <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:0;"><em>Denna kombination tillhör olika grupper (normativ etik vs livsstrategi). Grundläggande info visas — fullständig E/C/A finns inom varje grupp.</em></p>
+      </div>
+      <div class="cmp-section">
+        <h4><span class="level-badge c">C-nivå</span> Nyckelbegrepp</h4>
+        <p><b>${A.name}:</b> ${A.beg}</p>
+        <p><b>${B.name}:</b> ${B.beg}</p>
+      </div>`;
+  }
+}
+selA.addEventListener('change', renderComparison);
+selB.addEventListener('change', renderComparison);
+$('#swapBtn').addEventListener('click', () => { const t = selA.value; selA.value = selB.value; selB.value = t; renderComparison(); });
+$('#suggestBtn').addEventListener('click', () => {
+  const keys = Object.keys(COMPARISONS);
+  const k = keys[Math.floor(Math.random() * keys.length)];
+  const [a, b] = k.split('|');
+  selA.value = a; selB.value = b; renderComparison();
+});
+
+const caseSel = $('#caseSelect');
+Object.entries(CASES).forEach(([k, v]) => { caseSel.innerHTML += `<option value="${k}">${v.title}</option>`; });
+function renderCase() {
+  const c = CASES[caseSel.value];
+  $('#caseBox').innerHTML = `<b>${c.title}</b><br>${c.scenario}`;
+  const cl = $('#choiceList'); cl.innerHTML = '';
+  c.choices.forEach(ch => {
+    const b = document.createElement('button');
+    b.className = 'choice-btn'; b.type = 'button'; b.textContent = ch.label;
+    b.addEventListener('click', () => {
+      $$('.choice-btn').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      showFeedback(c, ch.key);
+    });
+    cl.appendChild(b);
+  });
+  $('#caseFeedback').classList.remove('show');
+}
+function showFeedback(c, key) {
+  const fb = c.feedback[key];
+  const labels = { utilitarism: "Utilitarism (Mill)", pliktetik: "Pliktetik (Kant)", sinnelagsetik: "Sinnelagsetik", dygdetik: "Dygdetik (Aristoteles)", etisk_egoism: "Etisk egoism" };
+  let html = `<h4>Analys av ditt val</h4>`;
+  Object.entries(fb).forEach(([k, v]) => { html += `<div class="feedback-item"><b>${labels[k] || k}:</b> ${v}</div>`; });
+  const box = $('#caseFeedback'); box.innerHTML = html; box.classList.add('show');
+}
+caseSel.addEventListener('change', renderCase);
+
+let currentDeck = FLASHCARDS_CONCEPTS.concat(FLASHCARDS_EXTRA);
+let cardIdx = 0;
+let currentMode = 'all';
+
+function buildDeck(mode) {
+  currentMode = mode;
+  if (mode === 'concepts') currentDeck = FLASHCARDS_CONCEPTS.slice();
+  else currentDeck = FLASHCARDS_CONCEPTS.concat(FLASHCARDS_EXTRA);
+  cardIdx = 0;
+  renderCard();
+}
+function renderCard() {
+  if (!currentDeck.length) return;
+  const c = currentDeck[cardIdx];
+  $('#cardTag').textContent = c.tag;
+  $('#cardQ').textContent = c.q;
+  $('#cardA').textContent = c.a;
+  $('#cardCounter').textContent = `${cardIdx + 1} / ${currentDeck.length}`;
+  $('#flashcard').classList.remove('flipped');
+}
+$('#flashcard').addEventListener('click', () => $('#flashcard').classList.toggle('flipped'));
+$('#flashcard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#flashcard').classList.toggle('flipped'); } });
+$('#cardNext').addEventListener('click', () => { cardIdx = (cardIdx + 1) % currentDeck.length; renderCard(); });
+$('#cardPrev').addEventListener('click', () => { cardIdx = (cardIdx - 1 + currentDeck.length) % currentDeck.length; renderCard(); });
+$('#cardShuffle').addEventListener('click', () => { cardIdx = Math.floor(Math.random() * currentDeck.length); renderCard(); });
+
+$$('.mode-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('.mode-toggle button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    buildDeck(btn.dataset.mode);
+  });
+});
+
+const THEORY_IDS = THEORIES_LIST.map(t => t.id);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function renderRandomTask() {
+  const scenario = pick(PROV_SCENARIOS);
+  const theoryId = pick(THEORY_IDS);
+  const theory = THEORY_SUMMARY[theoryId];
+  const container = $('#randomTaskContainer');
+  container.innerHTML = `
+    <div class="random-task">
+      <div class="assigned-theory">Din teori: ${theory.name}</div>
+      <p class="scenario">${scenario.text}</p>
+      <p class="question">Analysera situationen utifrån <b>${theory.name}</b>. Skriv 4–6 meningar. Använd teorins centrala begrepp.</p>
+      <textarea class="prov-answer" id="provAnswer" placeholder="Skriv ditt svar här…"></textarea>
+      <div class="btn-row" style="justify-content:flex-start;">
+        <button class="btn btn-primary" id="revealBtn" type="button">Visa facit</button>
+      </div>
+      <div class="facit-box" id="facitBox">
+        <h4>Modellsvar — E/C/A</h4>
+        <div class="facit-level"><b>E-nivå</b>${PROV_MODEL_ANSWERS[theoryId]?.e || ''}</div>
+        <div class="facit-level"><b>C-nivå</b>${PROV_MODEL_ANSWERS[theoryId]?.c || ''}</div>
+        <div class="facit-level"><b>A-nivå</b>${PROV_MODEL_ANSWERS[theoryId]?.a || ''}</div>
+        <h4>Självrättningschecklista</h4>
+        <ul class="self-check">
+          <li>Använder jag teorins centrala begrepp korrekt?</li>
+          <li>Kopplar jag till det specifika scenariot?</li>
+          <li>Behandlar jag invändningar mot teorin?</li>
+          <li>Är slutsatsen underbyggd och nyanserad?</li>
+          <li>Följer argumenten en tydlig struktur?</li>
+        </ul>
+        <h4>Filosofisk påminnelse</h4>
+        <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:0;">Teorins svar kan vara obekvämt. En utilitarist kan tvingas acceptera tortyr. En egoist kan tvingas acceptera själviskhet. Ett starkt provsvar följer teorin dit den leder — även om du personligen inte håller med.</p>
+      </div>
+    </div>`;
+  $('#revealBtn').addEventListener('click', () => {
+    $('#facitBox').classList.add('show');
+    $('#revealBtn').textContent = 'Facit visas';
+    $('#revealBtn').disabled = true;
+  });
+}
+$('#newTaskBtn').addEventListener('click', renderRandomTask);
+
+const PROV_FAST = [
+  { level: "C", title: "Handlings- vs regelutilitarism",
+    q: "Redogör för skillnaden mellan handlingsutilitarism och regelutilitarism. Ge ett exempel där de ger olika svar.",
+    a: "Handlingsutilitarismen kalkylerar nettonyttan för varje enskild handling. Regelutilitarismen följer generella regler som över tid maximerar lyckan. Exempel: Du överväger att ljuga för att skydda en vän. Handlingsutilitaristen kan tillåta lögnen om den maximerar lyckan i fallet. Regelutilitaristen förbjuder den eftersom en regel som tillåter lögn undergräver tilliten och på sikt minskar nyttan för alla." },
+  { level: "A", title: "Jämför utilitarism och pliktetik i det tiggande fallet",
+    q: "Jämför hur Mill och Kant skulle analysera det tiggande fallet. Vilka argument talar för respektive position? Vilken slutsats drar du?",
+    a: "Utilitaristen: Lidandeminskningen för barnen är enorm jämfört med fredagsmysets marginalnytta. Kantianen: Identifierar en imperfekt plikt att bistå nödställda. En maxim att aldrig hjälpa kan inte viljas som allmän lag. Dessutom underlåter man att behandla kvinnan som mål i sig. Skillnaden: Utilitaristen ser framåt mot konsekvenser; kantianen ser på handlingens förnuftsprincip. Båda landar i samma slutsats men av olika skäl. Invändning mot utilitarismen: kan offra individers rättigheter. Mot kantianen: ingen vägledning vid regelkonflikter. Min slutsats: Kantianen ger starkast skydd för individen; utilitarismen förklarar bättre praktiskt beslutsfattande." },
+  { level: "A", title: "Nihilismens självmotsägelse",
+    q: "Är nihilismen självmotsägande? Diskutera med hjälp av Humes lag.",
+    a: "Kritiken: Om nihilisten säger 'det finns inga värden', tycks hen mena att det är bättre att veta sanningen — vilket är ett värdepåstående. Försvar via Humes lag: Nihilisten skiljer på faktapåståenden och värdepåståenden. Påståendet 'det finns inga objektiva värden' är ett faktapåstående, inte ett moraliskt påstående. Men Humes lag är omdiskuterad: vissa menar att beskriva världen som 'värdelös' i sig är en värdebedömning. Frågan förblir en öppen filosofisk debatt." }
+];
+function renderProv() {
+  const list = $('#provList'); list.innerHTML = '';
+  PROV_FAST.forEach(p => {
+    const wrap = document.createElement('div');
+    wrap.className = 'accordion';
+    const badge = p.level === 'A' ? 'badge a-level' : p.level === 'C' ? 'badge c-level' : 'badge';
+    wrap.innerHTML = `
+      <button class="accordion-header" type="button" aria-expanded="false">
+        <span><span class="${badge}">${p.level}</span>${p.title}</span>
+        <span aria-hidden="true">▾</span>
+      </button>
+      <div class="accordion-content">
+        <h4>Fråga</h4><p>${p.q}</p>
+        <h4>Exempelsvar</h4>
+        <div class="example-answer">${p.a}</div>
+        <h4>Självrättningschecklista</h4>
+        <ul class="self-check">
+          <li>Har frågan besvarats direkt?</li>
+          <li>Används relevanta begrepp korrekt?</li>
+          <li>Jämförs teorierna direkt?</li>
+          <li>Behandlas invändningar?</li>
+          <li>Följer slutsatsen av resonemanget?</li>
+        </ul>
+      </div>`;
+    list.appendChild(wrap);
+    const header = wrap.querySelector('.accordion-header');
+    const content = wrap.querySelector('.accordion-content');
+    header.addEventListener('click', () => {
+      const open = content.classList.toggle('show');
+      header.setAttribute('aria-expanded', String(open));
+      header.querySelector('span[aria-hidden]').textContent = open ? '▴' : '▾';
+    });
+  });
+}
+
+renderBeg('');
+renderComparison();
+renderCase();
+buildDeck('all');
+renderProv();
+</script>
+</body>
+</html>
